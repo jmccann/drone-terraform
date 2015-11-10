@@ -9,33 +9,44 @@ import (
 	"github.com/drone/drone-plugin-go/plugin"
 )
 
-type Terraform struct {
-	Commands []string `json:"commands"`
+type terraform struct {
+	Remote remote            `json:"remote"`
+	DryRun bool              `json:"dryRun"`
+	Vars   map[string]string `json:"vars"`
+}
+
+type remote struct {
+	Backend string            `json:"backend"`
+	Config  map[string]string `json:"config"`
 }
 
 func main() {
 
 	workspace := plugin.Workspace{}
-	vargs := Terraform{}
+	vargs := terraform{}
 
 	plugin.Param("workspace", &workspace)
 	plugin.Param("vargs", &vargs)
 	plugin.MustParse()
 
-	//skip if no commands are specified
-	if len(vargs.Commands) == 0 {
-		return
+	var commands []*exec.Cmd
+	remote := vargs.Remote
+	if remote.Backend != "" {
+		commands = append(commands, remoteConfigCommand(remote))
+	}
+	commands = append(commands, planCommand(vargs.Vars))
+	if vargs.DryRun {
+		commands = append(commands, applyCommand())
 	}
 
-	for _, c := range vargs.Commands {
-		cmd := command(c)
-		cmd.Env = os.Environ()
-		cmd.Dir = workspace.Path
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		trace(cmd)
+	for _, c := range commands {
+		c.Env = os.Environ()
+		c.Dir = workspace.Path
+		c.Stdout = os.Stdout
+		c.Stderr = os.Stderr
+		trace(c)
 
-		err := cmd.Run()
+		err := c.Run()
 		if err != nil {
 			os.Exit(1)
 		}
@@ -43,9 +54,41 @@ func main() {
 
 }
 
-func command(cmd string) *exec.Cmd {
-	args := strings.Split(cmd, " ")
-	return exec.Command(args[0], args[1:]...)
+func remoteConfigCommand(config remote) *exec.Cmd {
+	args := []string{
+		"remote",
+		"config",
+		fmt.Sprintf("-backend=%s", config.Backend),
+	}
+	for k, v := range config.Config {
+		args = append(args, fmt.Sprintf("-backend-config=\"%s=%s\"", k, v))
+	}
+	return exec.Command(
+		"terraform",
+		args...,
+	)
+}
+
+func planCommand(variables map[string]string) *exec.Cmd {
+	args := []string{
+		"plan",
+		"-out=plan.tfout",
+	}
+	for k, v := range variables {
+		args = append(args, fmt.Sprintf("-var \"%s=%s\"", k, v))
+	}
+	return exec.Command(
+		"terraform",
+		args...,
+	)
+}
+
+func applyCommand() *exec.Cmd {
+	return exec.Command(
+		"terraform",
+		"apply",
+		"plan.tfout",
+	)
 }
 
 func trace(cmd *exec.Cmd) {
