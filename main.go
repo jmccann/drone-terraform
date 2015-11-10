@@ -35,7 +35,7 @@ func main() {
 		commands = append(commands, remoteConfigCommand(remote))
 	}
 	commands = append(commands, planCommand(vargs.Vars))
-	if vargs.DryRun {
+	if !vargs.DryRun {
 		commands = append(commands, applyCommand())
 	}
 
