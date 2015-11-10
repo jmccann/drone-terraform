@@ -61,7 +61,7 @@ func remoteConfigCommand(config remote) *exec.Cmd {
 		fmt.Sprintf("-backend=%s", config.Backend),
 	}
 	for k, v := range config.Config {
-		args = append(args, fmt.Sprintf("-backend-config=\"%s=%s\"", k, v))
+		args = append(args, fmt.Sprintf("-backend-config=%s=%s", k, v))
 	}
 	return exec.Command(
 		"terraform",
@@ -75,7 +75,8 @@ func planCommand(variables map[string]string) *exec.Cmd {
 		"-out=plan.tfout",
 	}
 	for k, v := range variables {
-		args = append(args, fmt.Sprintf("-var \"%s=%s\"", k, v))
+		args = append(args, "-var")
+		args = append(args, fmt.Sprintf("%s=%s", k, v))
 	}
 	return exec.Command(
 		"terraform",
