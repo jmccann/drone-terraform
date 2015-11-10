@@ -22,7 +22,7 @@ publish:
 plugin:
   name: Terraform
   desc: Execute Terraform commands
-  type: notify
-  image: plugins/drone-terraform
+  type: deploy
+  image: objectpartners/drone-terraform
   labels:
     - terraform
