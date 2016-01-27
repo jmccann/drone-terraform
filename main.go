@@ -11,7 +11,7 @@ import (
 
 type terraform struct {
 	Remote remote            `json:"remote"`
-	DryRun bool              `json:"dryRun"`
+	DryRun bool              `json:"dry_run"`
 	Vars   map[string]string `json:"vars"`
 }
 
