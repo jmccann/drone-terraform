@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"io/ioutil"
 
 	"github.com/drone/drone-plugin-go/plugin"
 )
@@ -18,6 +19,7 @@ type terraform struct {
 type remote struct {
 	Backend string            `json:"backend"`
 	Config  map[string]string `json:"config"`
+	Cacert  string            `json:"ca_cert"`
 }
 
 func main() {
@@ -31,6 +33,9 @@ func main() {
 
 	var commands []*exec.Cmd
 	remote := vargs.Remote
+	if remote.Cacert != "" {
+		commands = append(commands, installCaCert(remote.Cacert))
+	}
 	if remote.Backend != "" {
 		commands = append(commands, remoteConfigCommand(remote))
 	}
@@ -55,6 +60,13 @@ func main() {
 		fmt.Println("Command completed successfully")
 	}
 
+}
+
+func installCaCert(cacert string) *exec.Cmd {
+	ioutil.WriteFile("/usr/local/share/ca-certificates/ca_cert.crt", []byte(cacert), 0644)
+	return exec.Command(
+		"update-ca-certificates",
+	)
 }
 
 func remoteConfigCommand(config remote) *exec.Cmd {
