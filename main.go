@@ -14,12 +14,12 @@ type terraform struct {
 	Remote remote            `json:"remote"`
 	Plan   bool              `json:"plan"`
 	Vars   map[string]string `json:"vars"`
+	Cacert string            `json:"ca_cert"`
 }
 
 type remote struct {
 	Backend string            `json:"backend"`
 	Config  map[string]string `json:"config"`
-	Cacert  string            `json:"ca_cert"`
 }
 
 func main() {
@@ -33,8 +33,8 @@ func main() {
 
 	var commands []*exec.Cmd
 	remote := vargs.Remote
-	if remote.Cacert != "" {
-		commands = append(commands, installCaCert(remote.Cacert))
+	if vargs.Cacert != "" {
+		commands = append(commands, installCaCert(vargs.Cacert))
 	}
 	if remote.Backend != "" {
 		commands = append(commands, remoteConfigCommand(remote))
