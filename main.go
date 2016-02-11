@@ -11,10 +11,11 @@ import (
 )
 
 type terraform struct {
-	Remote remote            `json:"remote"`
-	Plan   bool              `json:"plan"`
-	Vars   map[string]string `json:"vars"`
-	Cacert string            `json:"ca_cert"`
+	Remote    remote            `json:"remote"`
+	Plan      bool              `json:"plan"`
+	Vars      map[string]string `json:"vars"`
+	Cacert    string            `json:"ca_cert"`
+	Sensitive bool              `json:"sensitive"`
 }
 
 type remote struct {
@@ -49,7 +50,9 @@ func main() {
 		c.Dir = workspace.Path
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
-		trace(c)
+		if !vargs.Sensitive {
+			trace(c)
+		}
 
 		err := c.Run()
 		if err != nil {
