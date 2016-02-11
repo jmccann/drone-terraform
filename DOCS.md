@@ -7,6 +7,7 @@ Use the Terraform plugin to apply the infrastructure configuration contained wit
 * `vars` - a map of variables to pass to the Terraform `plan` and `apply` commands. Each value is passed as a `-var
  <key>=<value>` option.
 * `ca_cert` - ca cert to add to your environment to allow terraform to use internal/private resources
+* `sensitive` (default: `false`) - Whether or not to suppress terraform commands to stdout.
 
 The following is a sample Terraform configuration in your .drone.yml file:
 
@@ -49,4 +50,26 @@ deploy:
       asdfsadf
       asdfsadf
       -----END CERTIFICATE-----
+```
+
+## Suppress Sensitive Output
+You may be passing sensitive vars to your terraform commands.  If you do not want
+the terraform commands to display in your drone logs then set `sensitive` to `true`.
+The output from the commands themselves will still display, it just won't show
+want command is actually being ran.
+
+```yaml
+deploy:
+  terraform:
+    dry_run: false
+    sensitive: true
+    remote:
+      backend: S3
+      config:
+        bucket: my-terraform-config-bucket
+        key: tf-states/my-project
+        region: us-east-1
+      vars:
+        app_name: my-project
+        app_version: 1.0.0
 ```
