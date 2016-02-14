@@ -11,7 +11,7 @@ import (
 
 type terraform struct {
 	Remote remote            `json:"remote"`
-	DryRun bool              `json:"dry_run"`
+	Plan   bool              `json:"plan"`
 	Vars   map[string]string `json:"vars"`
 }
 
@@ -35,7 +35,7 @@ func main() {
 		commands = append(commands, remoteConfigCommand(remote))
 	}
 	commands = append(commands, planCommand(vargs.Vars))
-	if !vargs.DryRun {
+	if !vargs.Plan {
 		commands = append(commands, applyCommand())
 	}
 
