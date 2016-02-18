@@ -37,7 +37,7 @@ CA Certificate.  You can inject your CA Certificate into the plugin by using
 ```yaml
 deploy:
   terraform:
-    dry_run: false
+    plan: false
     remote:
       backend: swift
       config:
@@ -61,7 +61,7 @@ want command is actually being ran.
 ```yaml
 deploy:
   terraform:
-    dry_run: false
+    plan: false
     sensitive: true
     remote:
       backend: S3
