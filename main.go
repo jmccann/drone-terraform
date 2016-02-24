@@ -2,12 +2,16 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
-	"io/ioutil"
 
 	"github.com/drone/drone-plugin-go/plugin"
+)
+
+var (
+	buildCommit string
 )
 
 type terraform struct {
@@ -24,6 +28,7 @@ type remote struct {
 }
 
 func main() {
+	fmt.Printf("Drone Terraform Plugin built from %s\n", buildCommit)
 
 	workspace := plugin.Workspace{}
 	vargs := terraform{}
