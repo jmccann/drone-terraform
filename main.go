@@ -38,12 +38,14 @@ func main() {
 		commands = append(commands, installCaCert(vargs.Cacert))
 	}
 	if remote.Backend != "" {
+		commands = append(commands, deleteCache())
 		commands = append(commands, remoteConfigCommand(remote))
 	}
 	commands = append(commands, planCommand(vargs.Vars))
 	if !vargs.Plan {
 		commands = append(commands, applyCommand())
 	}
+	commands = append(commands, deleteCache())
 
 	for _, c := range commands {
 		c.Env = os.Environ()
@@ -69,6 +71,14 @@ func installCaCert(cacert string) *exec.Cmd {
 	ioutil.WriteFile("/usr/local/share/ca-certificates/ca_cert.crt", []byte(cacert), 0644)
 	return exec.Command(
 		"update-ca-certificates",
+	)
+}
+
+func deleteCache() *exec.Cmd {
+	return exec.Command(
+		"rm",
+		"-rf",
+		".terraform",
 	)
 }
 
