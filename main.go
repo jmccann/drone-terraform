@@ -6,8 +6,12 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/drone/drone-plugin-go/plugin"
+    "time"
+    "github.com/aws/aws-sdk-go/aws/credentials"
+    "github.com/aws/aws-sdk-go/aws/credentials/stscreds"
+    "github.com/aws/aws-sdk-go/aws/session"
+    "github.com/aws/aws-sdk-go/service/sts"
+    "github.com/drone/drone-plugin-go/plugin"
 )
 
 var (
@@ -20,6 +24,7 @@ type terraform struct {
 	Vars      map[string]string `json:"vars"`
 	Cacert    string            `json:"ca_cert"`
 	Sensitive bool              `json:"sensitive"`
+	RoleARN	  string            `json:"role_arn_to_assume"`
 }
 
 type remote struct {
@@ -36,6 +41,10 @@ func main() {
 	plugin.Param("workspace", &workspace)
 	plugin.Param("vargs", &vargs)
 	plugin.MustParse()
+
+	if vargs.RoleARN != "" {
+		assumeRole(vargs.RoleARN)
+	}
 
 	var commands []*exec.Cmd
 	remote := vargs.Remote
@@ -123,6 +132,27 @@ func applyCommand() *exec.Cmd {
 		"apply",
 		"plan.tfout",
 	)
+}
+
+func assumeRole(roleArn string) {
+    client := sts.New(session.New())
+    duration := time.Hour * 1
+    stsProvider := &stscreds.AssumeRoleProvider{
+        Client: client,
+        Duration: duration,
+        RoleARN: roleArn,
+        RoleSessionName: "drone",
+    }
+
+    value, err := credentials.NewCredentials(stsProvider).Get()
+	if err != nil {
+		fmt.Println("Error assuming role!")
+		fmt.Println(err)
+		os.Exit(1)
+	}
+    os.Setenv("AWS_ACCESS_KEY_ID",value.AccessKeyID)
+    os.Setenv("AWS_SECRET_ACCESS_KEY",value.SecretAccessKey)
+    os.Setenv("AWS_SESSION_TOKEN",value.SessionToken)
 }
 
 func trace(cmd *exec.Cmd) {
