@@ -2,16 +2,16 @@ package main
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/drone/drone-plugin-go/plugin"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
-    "time"
-    "github.com/aws/aws-sdk-go/aws/credentials"
-    "github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-    "github.com/aws/aws-sdk-go/aws/session"
-    "github.com/aws/aws-sdk-go/service/sts"
-    "github.com/drone/drone-plugin-go/plugin"
+	"time"
 )
 
 var (
@@ -24,7 +24,8 @@ type terraform struct {
 	Vars      map[string]string `json:"vars"`
 	Cacert    string            `json:"ca_cert"`
 	Sensitive bool              `json:"sensitive"`
-	RoleARN	  string            `json:"role_arn_to_assume"`
+	RoleARN   string            `json:"role_arn_to_assume"`
+	RootDir   string            `json:"root_dir"`
 }
 
 type remote struct {
@@ -64,6 +65,9 @@ func main() {
 	for _, c := range commands {
 		c.Env = os.Environ()
 		c.Dir = workspace.Path
+		if vargs.RootDir != "" {
+			c.Dir = c.Dir + "/" + vargs.RootDir
+		}
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
 		if !vargs.Sensitive {
@@ -135,24 +139,24 @@ func applyCommand() *exec.Cmd {
 }
 
 func assumeRole(roleArn string) {
-    client := sts.New(session.New())
-    duration := time.Hour * 1
-    stsProvider := &stscreds.AssumeRoleProvider{
-        Client: client,
-        Duration: duration,
-        RoleARN: roleArn,
-        RoleSessionName: "drone",
-    }
+	client := sts.New(session.New())
+	duration := time.Hour * 1
+	stsProvider := &stscreds.AssumeRoleProvider{
+		Client:          client,
+		Duration:        duration,
+		RoleARN:         roleArn,
+		RoleSessionName: "drone",
+	}
 
-    value, err := credentials.NewCredentials(stsProvider).Get()
+	value, err := credentials.NewCredentials(stsProvider).Get()
 	if err != nil {
 		fmt.Println("Error assuming role!")
 		fmt.Println(err)
 		os.Exit(1)
 	}
-    os.Setenv("AWS_ACCESS_KEY_ID",value.AccessKeyID)
-    os.Setenv("AWS_SECRET_ACCESS_KEY",value.SecretAccessKey)
-    os.Setenv("AWS_SESSION_TOKEN",value.SessionToken)
+	os.Setenv("AWS_ACCESS_KEY_ID", value.AccessKeyID)
+	os.Setenv("AWS_SECRET_ACCESS_KEY", value.SecretAccessKey)
+	os.Setenv("AWS_SESSION_TOKEN", value.SessionToken)
 }
 
 func trace(cmd *exec.Cmd) {
