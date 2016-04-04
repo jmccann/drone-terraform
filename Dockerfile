@@ -4,7 +4,7 @@
 #     docker build --rm=true -t plugins/drone-terraform .
 
 FROM gliderlabs/alpine:3.2
-RUN apk-install ca-certificates
+RUN apk-install ca-certificates git
 
 ENV TERRAFORM_VERSION 0.6.14
 
