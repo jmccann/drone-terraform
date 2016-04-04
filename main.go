@@ -56,6 +56,7 @@ func main() {
 		commands = append(commands, deleteCache())
 		commands = append(commands, remoteConfigCommand(remote))
 	}
+	commands = append(commands, getModules())
 	commands = append(commands, planCommand(vargs.Vars))
 	if !vargs.Plan {
 		commands = append(commands, applyCommand())
@@ -112,6 +113,13 @@ func remoteConfigCommand(config remote) *exec.Cmd {
 	return exec.Command(
 		"terraform",
 		args...,
+	)
+}
+
+func getModules() *exec.Cmd {
+	return exec.Command(
+		"terraform",
+		"get",
 	)
 }
 
