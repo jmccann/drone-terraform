@@ -66,6 +66,12 @@ func main() {
 	for _, c := range commands {
 		c.Env = os.Environ()
 		c.Dir = workspace.Path
+		if c.Dir == "" {
+			wd, err := os.Getwd()
+			if err == nil {
+				c.Dir = wd
+			}
+		}
 		if vargs.RootDir != "" {
 			c.Dir = c.Dir + "/" + vargs.RootDir
 		}
