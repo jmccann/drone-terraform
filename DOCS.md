@@ -9,6 +9,7 @@ Use the Terraform plugin to apply the infrastructure configuration contained wit
 * `ca_cert` - ca cert to add to your environment to allow terraform to use internal/private resources
 * `sensitive` (default: `false`) - Whether or not to suppress terraform commands to stdout.
 * `role_arn_to_assume` - A role to assume before running the terraform commands
+* `root_dir` - The root directory where the terraform files live. When unset, the top level directory will be assumed.
 
 The following is a sample Terraform configuration in your .drone.yml file:
 
@@ -92,4 +93,23 @@ deploy:
       app_name: my-project
       app_version: 1.0.0
     role_arn_to_assume: arn:aws:iam::account-of-role-to-assume:role/name-of-role
+```
+
+## Root dir
+You may want to change directories before applying the terraform commands.  This parameter is useful if you have multiple environments in different folders and you want to use different drone configurations to apply different environments.
+
+```yaml
+deploy:
+  terraform:
+    plan: false
+    remote:
+      backend: S3
+      config:
+        bucket: my-terraform-config-bucket
+        key: tf-states/my-project
+        region: us-east-1
+    vars:
+      app_name: my-project
+      app_version: 1.0.0
+    root_dir: some/path/here
 ```
