@@ -6,7 +6,7 @@
 FROM gliderlabs/alpine:3.2
 RUN apk-install ca-certificates
 
-ENV TERRAFORM_VERSION 0.6.11
+ENV TERRAFORM_VERSION 0.6.14
 
 RUN apk update && \
     wget -q "https://circle-artifacts.com/gh/andyshinn/alpine-pkg-glibc/6/artifacts/0/home/ubuntu/alpine-pkg-glibc/packages/x86_64/glibc-2.21-r2.apk" && \
