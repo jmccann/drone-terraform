@@ -8,8 +8,9 @@ Use the Terraform plugin to apply the infrastructure configuration contained wit
  <key>=<value>` option.
 * `ca_cert` - ca cert to add to your environment to allow terraform to use internal/private resources
 * `sensitive` (default: `false`) - Whether or not to suppress terraform commands to stdout.
-* `role_arn_to_assume` - A role to assume before running the terraform commands
+* `role_arn_to_assume` - A role to assume before running the terraform commands.
 * `root_dir` - The root directory where the terraform files live. When unset, the top level directory will be assumed.
+* `parallelism` - The number of concurrent operations as Terraform walks its graph.
 
 The following is a sample Terraform configuration in your .drone.yml file:
 
@@ -112,4 +113,24 @@ deploy:
       app_name: my-project
       app_version: 1.0.0
     root_dir: some/path/here
+```
+
+## Parallelism
+You may want to limit the number of concurrent operations as Terraform walks its graph.
+If you want to change Terraform's default parallelism (currently equal to 10) then set the `parallelism` parameter.
+
+```yaml
+deploy:
+  terraform:
+    plan: false
+    remote:
+      backend: S3
+      config:
+        bucket: my-terraform-config-bucket
+        key: tf-states/my-project
+        region: us-east-1
+    vars:
+      app_name: my-project
+      app_version: 1.0.0
+    parallelism: 2
 ```
