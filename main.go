@@ -19,13 +19,14 @@ var (
 )
 
 type terraform struct {
-	Remote    remote            `json:"remote"`
-	Plan      bool              `json:"plan"`
-	Vars      map[string]string `json:"vars"`
-	Cacert    string            `json:"ca_cert"`
-	Sensitive bool              `json:"sensitive"`
-	RoleARN   string            `json:"role_arn_to_assume"`
-	RootDir   string            `json:"root_dir"`
+	Remote      remote            `json:"remote"`
+	Plan        bool              `json:"plan"`
+	Vars        map[string]string `json:"vars"`
+	Cacert      string            `json:"ca_cert"`
+	Sensitive   bool              `json:"sensitive"`
+	RoleARN     string            `json:"role_arn_to_assume"`
+	RootDir     string            `json:"root_dir"`
+	Parallelism int               `json:"parallelism"`
 }
 
 type remote struct {
@@ -57,9 +58,9 @@ func main() {
 		commands = append(commands, remoteConfigCommand(remote))
 	}
 	commands = append(commands, getModules())
-	commands = append(commands, planCommand(vargs.Vars))
+	commands = append(commands, planCommand(vargs.Vars, vargs.Parallelism))
 	if !vargs.Plan {
-		commands = append(commands, applyCommand())
+		commands = append(commands, applyCommand(vargs.Parallelism))
 	}
 	commands = append(commands, deleteCache())
 
@@ -129,7 +130,7 @@ func getModules() *exec.Cmd {
 	)
 }
 
-func planCommand(variables map[string]string) *exec.Cmd {
+func planCommand(variables map[string]string, parallelism int) *exec.Cmd {
 	args := []string{
 		"plan",
 		"-out=plan.tfout",
@@ -138,17 +139,26 @@ func planCommand(variables map[string]string) *exec.Cmd {
 		args = append(args, "-var")
 		args = append(args, fmt.Sprintf("%s=%s", k, v))
 	}
+	if parallelism > 0 {
+		args = append(args, fmt.Sprintf("-parallelism=%d", parallelism))
+	}
 	return exec.Command(
 		"terraform",
 		args...,
 	)
 }
 
-func applyCommand() *exec.Cmd {
+func applyCommand(parallelism int) *exec.Cmd {
+	args := []string{
+		"apply",
+	}
+	if parallelism > 0 {
+		args = append(args, fmt.Sprintf("-parallelism=%d", parallelism))
+	}
+	args = append(args, "plan.tfout")
 	return exec.Command(
 		"terraform",
-		"apply",
-		"plan.tfout",
+		args...,
 	)
 }
 
