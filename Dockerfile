@@ -1,19 +1,16 @@
-# Docker image for Drone's terraform deployment plugin
+# Docker image for the Drone Terraform plugin
 #
-#     CGO_ENABLED=0 go build -a -tags netgo
-#     docker build --rm=true -t plugins/drone-terraform .
+#     cd $GOPATH/src/github.com/drone-plugins/drone-terraform
+#     make deps build docker
 
-FROM gliderlabs/alpine:3.2
-RUN apk-install ca-certificates git
+FROM alpine:3.4
 
-ENV TERRAFORM_VERSION 0.7.5
-
-RUN apk update && \
-    wget -q "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.21-r2/glibc-2.21-r2.apk" && \
-    apk add --allow-untrusted glibc-2.21-r2.apk && \
-    wget -q -O terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" && \
-    unzip terraform.zip -d /bin && \
-    rm -rf /var/cache/apk/* glibc-2.21-r2.apk terraform.zip
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" | tee -a /etc/apk/repositories && \
+  apk -U add \
+    ca-certificates \
+    git \
+    terraform && \
+  rm -rf /var/cache/apk/*
 
 ADD drone-terraform /bin/
 ENTRYPOINT ["/bin/drone-terraform"]
