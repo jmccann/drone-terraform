@@ -6,6 +6,8 @@ Use the Terraform plugin to apply the infrastructure configuration contained wit
   * `config` - a map of configuration parameters for the remote state backend. Each value is passed as a `-backend-config=<key>=<value>` option.
 * `vars` - a map of variables to pass to the Terraform `plan` and `apply` commands. Each value is passed as a `-var
  <key>=<value>` option.
+* `secrets` - a map of variables to pass to the Terraform `plan` and `apply` commands.  Each value is passed as a `-var
+ <key>=<ENVVAR>` option.  The `ENVVAR` is read as the key/pair value.
 * `ca_cert` - ca cert to add to your environment to allow terraform to use internal/private resources
 * `sensitive` (default: `false`) - Whether or not to suppress terraform commands to stdout.
 * `role_arn_to_assume` - A role to assume before running the terraform commands.
@@ -27,6 +29,8 @@ deploy:
     vars:
       app_name: my-project
       app_version: 1.0.0
+    secrets:
+      my_secret: TERRAFORM_SECRET
 ```
 
 # Advanced Configuration
