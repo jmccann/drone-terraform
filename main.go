@@ -9,14 +9,14 @@ import (
 	"github.com/urfave/cli"
 )
 
-var version string // build number set at compile-time
+var revision string // build number set at compile-time
 
 func main() {
 	app := cli.NewApp()
 	app.Name = "terraform plugin"
 	app.Usage = "terraform plugin"
 	app.Action = run
-	app.Version = version
+	app.Version = revision
 	app.Flags = []cli.Flag{
 
 		//
@@ -81,6 +81,10 @@ func main() {
 }
 
 func run(c *cli.Context) error {
+	logrus.WithFields(logrus.Fields{
+		"Revision": revision,
+	}).Info("Drone Terraform Plugin Version")
+
 	if c.String("env-file") != "" {
 		_ = godotenv.Load(c.String("env-file"))
 	}

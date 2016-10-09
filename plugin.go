@@ -6,15 +6,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/Sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
-)
-
-var (
-	buildCommit string
 )
 
 type (
@@ -41,8 +38,6 @@ type (
 )
 
 func (p Plugin) Exec() error {
-	fmt.Printf("Drone Terraform Plugin built from %s\n", buildCommit)
-
 	if p.Config.RoleARN != "" {
 		assumeRole(p.Config.RoleARN)
 	}
@@ -81,11 +76,11 @@ func (p Plugin) Exec() error {
 
 		err := c.Run()
 		if err != nil {
-			fmt.Println("Error!")
-			fmt.Println(err)
-			os.Exit(1)
+			logrus.WithFields(logrus.Fields{
+				"error": err,
+			}).Fatal("Failed to execute a command")
 		}
-		fmt.Println("Command completed successfully")
+		logrus.Debug("Command completed successfully")
 	}
 
 	return nil
@@ -176,9 +171,9 @@ func assumeRole(roleArn string) {
 
 	value, err := credentials.NewCredentials(stsProvider).Get()
 	if err != nil {
-		fmt.Println("Error assuming role!")
-		fmt.Println(err)
-		os.Exit(1)
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Fatal("Error assuming role!")
 	}
 	os.Setenv("AWS_ACCESS_KEY_ID", value.AccessKeyID)
 	os.Setenv("AWS_SECRET_ACCESS_KEY", value.SecretAccessKey)

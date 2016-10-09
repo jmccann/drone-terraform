@@ -9,7 +9,7 @@ pipeline:
       - CGO_ENABLED=0
     commands:
       - go test -cover -coverprofile=coverage.out
-      - go build -ldflags "-s -w -X main.build=$DRONE_BUILD_NUMBER" -a
+      - go build -ldflags "-s -w -X main.revision=$(git rev-parse HEAD)" -a
 
   coverage:
     image: coverage
