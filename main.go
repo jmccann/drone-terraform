@@ -2,16 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/drone/drone-plugin-go/plugin"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/drone/drone-plugin-go/plugin"
 )
 
 var (
@@ -58,6 +59,7 @@ func main() {
 		commands = append(commands, remoteConfigCommand(remote))
 	}
 	commands = append(commands, getModules())
+	commands = append(commands, validateCommand())
 	commands = append(commands, planCommand(vargs.Vars, vargs.Parallelism))
 	if !vargs.Plan {
 		commands = append(commands, applyCommand(vargs.Parallelism))
@@ -127,6 +129,16 @@ func getModules() *exec.Cmd {
 	return exec.Command(
 		"terraform",
 		"get",
+	)
+}
+
+func validateCommand() *exec.Cmd {
+	args := []string{
+		"validate",
+	}
+	return exec.Command(
+		"terraform",
+		args...,
 	)
 }
 
