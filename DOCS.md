@@ -17,8 +17,9 @@ Use the Terraform plugin to apply the infrastructure configuration contained wit
 The following is a sample Terraform configuration in your .drone.yml file:
 
 ```yaml
-deploy:
+pipeline:
   terraform:
+    image: jmccann/drone-terraform:0.5
     plan: false
     remote:
       backend: S3
@@ -42,8 +43,9 @@ CA Certificate.  You can inject your CA Certificate into the plugin by using
 `ca_certs` key as described above.  Below is an example.
 
 ```yaml
-deploy:
+pipeline:
   terraform:
+    image: jmccann/drone-terraform:0.5
     plan: false
     remote:
       backend: swift
@@ -56,7 +58,7 @@ deploy:
       -----BEGIN CERTIFICATE-----
       asdfsadf
       asdfsadf
-      -----END CERTIFICATE-----
+      -----END CERTIFICATE-------
 ```
 
 ## Suppress Sensitive Output
@@ -66,8 +68,9 @@ The output from the commands themselves will still display, it just won't show
 want command is actually being ran.
 
 ```yaml
-deploy:
+pipeline:
   terraform:
+    image: jmccann/drone-terraform:0.5
     plan: false
     sensitive: true
     remote:
@@ -85,8 +88,9 @@ deploy:
 You may want to assume another role before running the terraform commands. This is useful for cross account access, where a central account ahs privileges to assume roles in other accounts. Using the current credentials, this role will be assumed and exported to environment variables.  See [the discussion](https://github.com/hashicorp/terraform/issues/1275) in the Terraform issues.
 
 ```yaml
-deploy:
+pipeline:
   terraform:
+    image: jmccann/drone-terraform:0.5
     plan: false
     remote:
       backend: S3
@@ -104,8 +108,9 @@ deploy:
 You may want to change directories before applying the terraform commands.  This parameter is useful if you have multiple environments in different folders and you want to use different drone configurations to apply different environments.
 
 ```yaml
-deploy:
+pipeline:
   terraform:
+    image: jmccann/drone-terraform:0.5
     plan: false
     remote:
       backend: S3
@@ -124,8 +129,9 @@ You may want to limit the number of concurrent operations as Terraform walks its
 If you want to change Terraform's default parallelism (currently equal to 10) then set the `parallelism` parameter.
 
 ```yaml
-deploy:
+pipeline:
   terraform:
+    image: jmccann/drone-terraform:0.5
     plan: false
     remote:
       backend: S3
