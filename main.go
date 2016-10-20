@@ -93,12 +93,16 @@ func run(c *cli.Context) error {
 	json.Unmarshal([]byte(c.String("terraform.remote")), &remote)
 
 	var vars map[string]string
-	if err := json.Unmarshal([]byte(c.String("terraform.vars")), &vars); err != nil {
-		panic(err)
+	if c.String("terraform.vars") != "" {
+		if err := json.Unmarshal([]byte(c.String("terraform.vars")), &vars); err != nil {
+			panic(err)
+		}
 	}
 	var secrets map[string]string
-	if err := json.Unmarshal([]byte(c.String("terraform.secrets")), &secrets); err != nil {
-		panic(err)
+	if c.String("terraform.secrets") != "" {
+		if err := json.Unmarshal([]byte(c.String("terraform.secrets")), &secrets); err != nil {
+			panic(err)
+		}
 	}
 
 	plugin := Plugin{
