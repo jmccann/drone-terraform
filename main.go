@@ -24,47 +24,47 @@ func main() {
 		//
 
 		cli.BoolFlag{
-			Name: "terraform.plan",
+			Name: "plan",
 			Usage: "calculates a plan but does NOT apply it",
 			EnvVar: "PLUGIN_PLAN",
 		},
 		cli.StringFlag{
-			Name: "terraform.remote",
+			Name: "remote",
 			Usage: "contains the configuration for the Terraform remote state tracking",
 			EnvVar: "PLUGIN_REMOTE",
 		},
 		cli.StringFlag{
-			Name: "terraform.vars",
+			Name: "vars",
 			Usage: "a map of variables to pass to the Terraform `plan` and `apply` commands. Each value is passed as a `<key>=<value>` option",
 			EnvVar: "PLUGIN_VARS",
 		},
 		cli.StringFlag{
-			Name: "terraform.secrets",
+			Name: "secrets",
 			Usage: "a map of secrets to pass to the Terraform `plan` and `apply` commands. Each value is passed as a `<key>=<ENV>` option",
 			EnvVar: "PLUGIN_SECRETS",
 		},
 		cli.StringFlag{
-			Name: "terraform.ca_cert",
+			Name: "ca_cert",
 			Usage: "ca cert to add to your environment to allow terraform to use internal/private resources",
 			EnvVar: "PLUGIN_CA_CERT",
 		},
 		cli.BoolFlag{
-			Name: "terraform.sensitive",
+			Name: "sensitive",
 			Usage: "whether or not to suppress terraform commands to stdout",
 			EnvVar: "PLUGIN_SENSITIVE",
 		},
 		cli.StringFlag{
-			Name: "terraform.role_arn_to_assume",
+			Name: "role_arn_to_assume",
 			Usage: "A role to assume before running the terraform commands",
 			EnvVar: "PLUGIN_ROLE_ARN_TO_ASSUME",
 		},
 		cli.StringFlag{
-			Name: "terraform.root_dir",
+			Name: "root_dir",
 			Usage: "The root directory where the terraform files live. When unset, the top level directory will be assumed",
 			EnvVar: "PLUGIN_ROOT_DIR",
 		},
 		cli.IntFlag{
-			Name: "terraform.parallelism",
+			Name: "parallelism",
 			Usage: "The number of concurrent operations as Terraform walks its graph",
 			EnvVar: "PLUGIN_PARALLELISM",
 		},
@@ -93,14 +93,14 @@ func run(c *cli.Context) error {
 	json.Unmarshal([]byte(c.String("terraform.remote")), &remote)
 
 	var vars map[string]string
-	if c.String("terraform.vars") != "" {
-		if err := json.Unmarshal([]byte(c.String("terraform.vars")), &vars); err != nil {
+	if c.String("vars") != "" {
+		if err := json.Unmarshal([]byte(c.String("vars")), &vars); err != nil {
 			panic(err)
 		}
 	}
 	var secrets map[string]string
-	if c.String("terraform.secrets") != "" {
-		if err := json.Unmarshal([]byte(c.String("terraform.secrets")), &secrets); err != nil {
+	if c.String("secrets") != "" {
+		if err := json.Unmarshal([]byte(c.String("secrets")), &secrets); err != nil {
 			panic(err)
 		}
 	}
@@ -108,14 +108,14 @@ func run(c *cli.Context) error {
 	plugin := Plugin{
 		Config: Config{
 			Remote:      remote,
-			Plan:        c.Bool("terraform.plan"),
+			Plan:        c.Bool("plan"),
 			Vars:        vars,
 			Secrets:     secrets,
-			Cacert:      c.String("terraform.ca_cert"),
-			Sensitive:   c.Bool("terraform.sensitive"),
-			RoleARN:     c.String("terraform.role_arn_to_assume"),
-			RootDir:     c.String("terraform.root_dir"),
-			Parallelism: c.Int("terraform.parallelism"),
+			Cacert:      c.String("ca_cert"),
+			Sensitive:   c.Bool("sensitive"),
+			RoleARN:     c.String("role_arn_to_assume"),
+			RootDir:     c.String("root_dir"),
+			Parallelism: c.Int("parallelism"),
 		},
 	}
 
