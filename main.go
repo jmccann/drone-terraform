@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/Sirupsen/logrus"
+	"github.com/joho/godotenv"
 	"github.com/urfave/cli"
 )
 
@@ -24,53 +24,53 @@ func main() {
 		//
 
 		cli.BoolFlag{
-			Name: "plan",
-			Usage: "calculates a plan but does NOT apply it",
+			Name:   "plan",
+			Usage:  "calculates a plan but does NOT apply it",
 			EnvVar: "PLUGIN_PLAN",
 		},
 		cli.StringFlag{
-			Name: "remote",
-			Usage: "contains the configuration for the Terraform remote state tracking",
+			Name:   "remote",
+			Usage:  "contains the configuration for the Terraform remote state tracking",
 			EnvVar: "PLUGIN_REMOTE",
 		},
 		cli.StringFlag{
-			Name: "vars",
-			Usage: "a map of variables to pass to the Terraform `plan` and `apply` commands. Each value is passed as a `<key>=<value>` option",
+			Name:   "vars",
+			Usage:  "a map of variables to pass to the Terraform `plan` and `apply` commands. Each value is passed as a `<key>=<value>` option",
 			EnvVar: "PLUGIN_VARS",
 		},
 		cli.StringFlag{
-			Name: "secrets",
-			Usage: "a map of secrets to pass to the Terraform `plan` and `apply` commands. Each value is passed as a `<key>=<ENV>` option",
+			Name:   "secrets",
+			Usage:  "a map of secrets to pass to the Terraform `plan` and `apply` commands. Each value is passed as a `<key>=<ENV>` option",
 			EnvVar: "PLUGIN_SECRETS",
 		},
 		cli.StringFlag{
-			Name: "ca_cert",
-			Usage: "ca cert to add to your environment to allow terraform to use internal/private resources",
+			Name:   "ca_cert",
+			Usage:  "ca cert to add to your environment to allow terraform to use internal/private resources",
 			EnvVar: "PLUGIN_CA_CERT",
 		},
 		cli.BoolFlag{
-			Name: "sensitive",
-			Usage: "whether or not to suppress terraform commands to stdout",
+			Name:   "sensitive",
+			Usage:  "whether or not to suppress terraform commands to stdout",
 			EnvVar: "PLUGIN_SENSITIVE",
 		},
 		cli.StringFlag{
-			Name: "role_arn_to_assume",
-			Usage: "A role to assume before running the terraform commands",
+			Name:   "role_arn_to_assume",
+			Usage:  "A role to assume before running the terraform commands",
 			EnvVar: "PLUGIN_ROLE_ARN_TO_ASSUME",
 		},
 		cli.StringFlag{
-			Name: "root_dir",
-			Usage: "The root directory where the terraform files live. When unset, the top level directory will be assumed",
+			Name:   "root_dir",
+			Usage:  "The root directory where the terraform files live. When unset, the top level directory will be assumed",
 			EnvVar: "PLUGIN_ROOT_DIR",
 		},
 		cli.IntFlag{
-			Name: "parallelism",
-			Usage: "The number of concurrent operations as Terraform walks its graph",
+			Name:   "parallelism",
+			Usage:  "The number of concurrent operations as Terraform walks its graph",
 			EnvVar: "PLUGIN_PARALLELISM",
 		},
 
 		cli.StringFlag{
-			Name:	"env-file",
+			Name:  "env-file",
 			Usage: "source env file",
 		},
 	}
@@ -90,7 +90,7 @@ func run(c *cli.Context) error {
 	}
 
 	remote := Remote{}
-	json.Unmarshal([]byte(c.String("terraform.remote")), &remote)
+	json.Unmarshal([]byte(c.String("remote")), &remote)
 
 	var vars map[string]string
 	if c.String("vars") != "" {

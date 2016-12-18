@@ -144,3 +144,26 @@ pipeline:
       app_version: 1.0.0
     parallelism: 2
 ```
+
+## Remote configuration
+
+If you are configuring an s3 remote state and require S3 environment secrets you add the secrets "FOO" and "BAR" to your drone environment and reference the secrets as follows. These will not be outputted to stdout.
+
+```yaml
+pipeline:
+  terraform:
+    image: jmccann/drone-terraform:0.5
+    plan: false
+    remote:
+      backend: S3
+      config:
+        bucket: my-terraform-config-bucket
+        key: tf-states/my-project
+        region: us-east-1
+    vars:
+      app_name: my-project
+      app_version: 1.0.0
+    secrets:
+      AWS_ACCESS_KEY_ID: FOO
+      AWS_SECRET_ACCESS_KEY: BAR
+```

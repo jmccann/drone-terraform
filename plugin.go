@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/Sirupsen/logrus"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/Sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -44,6 +44,9 @@ func (p Plugin) Exec() error {
 
 	var commands []*exec.Cmd
 	remote := p.Config.Remote
+	if len(p.Config.Secrets) != 0 {
+		exportSecrets(p.Config.Secrets)
+	}
 	if p.Config.Cacert != "" {
 		commands = append(commands, installCaCert(p.Config.Cacert))
 	}
@@ -91,6 +94,12 @@ func installCaCert(cacert string) *exec.Cmd {
 	return exec.Command(
 		"update-ca-certificates",
 	)
+}
+
+func exportSecrets(secrets map[string]string) {
+	for k, v := range secrets {
+		os.Setenv(fmt.Sprintf("%s", k), fmt.Sprintf("%s", os.Getenv(v)))
+	}
 }
 
 func deleteCache() *exec.Cmd {
