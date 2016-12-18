@@ -1,7 +1,7 @@
 # Docker image for Drone's terraform deployment plugin
 #
-#     CGO_ENABLED=0 go build -a -tags netgo
-#     docker build --rm=true -t plugins/drone-terraform .
+#     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo
+#     docker build --rm=true -t jmccann/drone-terraform .
 
 FROM gliderlabs/alpine:3.2
 RUN apk-install ca-certificates git
