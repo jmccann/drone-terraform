@@ -125,7 +125,28 @@ pipeline:
 ```
 
 ## Targets
-You may want to only target a specific list of resources within your terraform code. To achieve this you can specify the `targets` parameter. If left undefined all resources will be planned/applied against as the default behavior. 
+You may want to only target a specific list of resources within your terraform code. To achieve this you can specify the `targets` parameter. If left undefined all resources will be planned/applied against as the default behavior.
+
+Single target:
+
+```yaml
+pipeline:
+  terraform:
+    image: jmccann/drone-terraform:0.5
+    plan: false
+    targets: aws_security_group.generic_sg
+    remote:
+      backend: S3
+      config:
+        bucket: my-terraform-config-bucket
+        key: tf-states/my-project
+        region: us-east-1
+    vars:
+      app_name: my-project
+      app_version: 1.0.0
+```
+
+Multiple targets:
 
 ```yaml
 pipeline:
@@ -144,7 +165,7 @@ pipeline:
     vars:
       app_name: my-project
       app_version: 1.0.0
-````
+```
 
 ## Parallelism
 You may want to limit the number of concurrent operations as Terraform walks its graph.
