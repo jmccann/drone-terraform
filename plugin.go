@@ -130,8 +130,7 @@ func planCommand(variables map[string]string, secrets map[string]string, paralle
 		"-out=plan.tfout",
 	}
 	for _, v := range targets {
-		args = append(args, "--target")
-		args = append(args, fmt.Sprintf("%s", v))
+		args = append(args, "--target", fmt.Sprintf("%s", v))
 	}
 	for k, v := range variables {
 		args = append(args, "-var")
@@ -155,8 +154,7 @@ func applyCommand(parallelism int, targets []string) *exec.Cmd {
 		"apply",
 	}
 	for _, v := range targets {
-		args = append(args, "--target")
-		args = append(args, fmt.Sprintf("%s", v))
+		args = append(args, "--target", fmt.Sprintf("%s", v))
 	}
 	if parallelism > 0 {
 		args = append(args, fmt.Sprintf("-parallelism=%d", parallelism))
