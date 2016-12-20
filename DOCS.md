@@ -124,15 +124,17 @@ pipeline:
     root_dir: some/path/here
 ```
 
-## targets
-You may want to only target a specific list of resources within your terraform code. To achieve this you can specify the `targets` parameter. If left undefined all resources will be planned/applied against as the default behavior. You can define multiple targets with a comma separated list.
+## Targets
+You may want to only target a specific list of resources within your terraform code. To achieve this you can specify the `targets` parameter. If left undefined all resources will be planned/applied against as the default behavior. 
 
 ```yaml
 pipeline:
   terraform:
     image: jmccann/drone-terraform:0.5
     plan: false
-    targets: aws_security_group.generic_sg, aws_security_group.app_sg
+    targets:
+      - aws_security_group.generic_sg
+      - aws_security_group.app_sg
     remote:
       backend: S3
       config:
