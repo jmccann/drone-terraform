@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/Sirupsen/logrus"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/Sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -25,6 +25,7 @@ type (
 		RoleARN     string
 		RootDir     string
 		Parallelism int
+		Targets     []string
 	}
 
 	Remote struct {
@@ -52,9 +53,9 @@ func (p Plugin) Exec() error {
 		commands = append(commands, remoteConfigCommand(remote))
 	}
 	commands = append(commands, getModules())
-	commands = append(commands, planCommand(p.Config.Vars, p.Config.Secrets, p.Config.Parallelism))
+	commands = append(commands, planCommand(p.Config.Vars, p.Config.Secrets, p.Config.Parallelism, p.Config.Targets))
 	if !p.Config.Plan {
-		commands = append(commands, applyCommand(p.Config.Parallelism))
+		commands = append(commands, applyCommand(p.Config.Parallelism, p.Config.Targets))
 	}
 	commands = append(commands, deleteCache())
 
@@ -123,10 +124,13 @@ func getModules() *exec.Cmd {
 	)
 }
 
-func planCommand(variables map[string]string, secrets map[string]string, parallelism int) *exec.Cmd {
+func planCommand(variables map[string]string, secrets map[string]string, parallelism int, targets []string) *exec.Cmd {
 	args := []string{
 		"plan",
 		"-out=plan.tfout",
+	}
+	for _, v := range targets {
+		args = append(args, "--target", fmt.Sprintf("%s", v))
 	}
 	for k, v := range variables {
 		args = append(args, "-var")
@@ -145,9 +149,12 @@ func planCommand(variables map[string]string, secrets map[string]string, paralle
 	)
 }
 
-func applyCommand(parallelism int) *exec.Cmd {
+func applyCommand(parallelism int, targets []string) *exec.Cmd {
 	args := []string{
 		"apply",
+	}
+	for _, v := range targets {
+		args = append(args, "--target", fmt.Sprintf("%s", v))
 	}
 	if parallelism > 0 {
 		args = append(args, fmt.Sprintf("-parallelism=%d", parallelism))
