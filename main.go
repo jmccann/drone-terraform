@@ -96,7 +96,7 @@ func run(c *cli.Context) error {
 	}
 
 	remote := Remote{}
-	json.Unmarshal([]byte(c.String("terraform.remote")), &remote)
+	json.Unmarshal([]byte(c.String("remote")), &remote)
 
 	var vars map[string]string
 	if c.String("vars") != "" {
