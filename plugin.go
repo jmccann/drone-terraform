@@ -53,8 +53,13 @@ func (p Plugin) Exec() error {
 		exportSecrets(p.Config.Secrets)
 	}
 
+	var overridesFileName string
 	if len(p.Config.Submodules) != 0 {
-		submoduleOverride(p.Config.Submodules)
+		overridesFileName = submoduleOverride(p.Config.Submodules)
+
+		if overridesFileName != "" {
+			defer os.Remove(overridesFileName)
+		}
 	}
 
 	if p.Config.Cacert != "" {
@@ -106,28 +111,37 @@ func installCaCert(cacert string) *exec.Cmd {
 	)
 }
 
-func submoduleOverride(submodules map[string]map[string]string) {
+func submoduleOverride(submodules map[string]map[string]string) string {
 	allOverrides := []string{}
+
 	for moduleName, override := range submodules {
 		overrideContents := []string{}
 		for k, v := range override {
-			overrideString := fmt.Sprintf(`  %s = "%s"`, k, v)
-			overrideContents = append(overrideContents, overrideString)
+			overrideContents = append(overrideContents, fmt.Sprintf(`  %s = "%s"`, k, v))
 		}
-		moduleContents := fmt.Sprintf(`
-module "%s" {
-%s
-}`, moduleName, strings.Join(overrideContents, "\n"))
+		moduleContents := fmt.Sprintf("module \"%s\" {\n%s\n}", moduleName, strings.Join(overrideContents, "\n"))
 		allOverrides = append(allOverrides, moduleContents)
 	}
+
 	fileContents := []byte(strings.Join(allOverrides, "\n"))
+
 	randBytes := make([]byte, 16)
 	rand.Read(randBytes)
 	fileName := hex.EncodeToString(randBytes) + "_override.tf"
-	err := ioutil.WriteFile(fileName, fileContents, 0644)
-	if err != nil {
+
+	if err := ioutil.WriteFile(fileName, fileContents, 0644); err != nil {
 		panic(err)
 	}
+
+	return fileName
+}
+
+func removeOverridesFile(fileName string) *exec.Cmd {
+	return exec.Command(
+		"rm",
+		"-f",
+		fileName,
+	)
 }
 
 func exportSecrets(secrets map[string]string) {

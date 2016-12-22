@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 
 	"github.com/Sirupsen/logrus"
@@ -69,18 +68,15 @@ func main() {
 			Usage:  "The number of concurrent operations as Terraform walks its graph",
 			EnvVar: "PLUGIN_PARALLELISM",
 		},
-
 		cli.StringFlag{
 			Name:  "env-file",
 			Usage: "source env file",
 		},
-
 		cli.StringSliceFlag{
 			Name:   "targets",
 			Usage:  "targets to run apply or plan on",
 			EnvVar: "PLUGIN_TARGETS",
 		},
-
 		cli.StringFlag{
 			Name:   "submodules",
 			Usage:  "submodules to override",
