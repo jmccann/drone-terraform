@@ -1,7 +1,6 @@
 # Docker image for the Drone Terraform plugin
 #
-#     cd $GOPATH/src/github.com/drone-plugins/drone-terraform
-#     make deps build docker
+#     docker build --rm=true -t jmccann/drone-terraform:latest .
 
 FROM alpine:3.4
 
