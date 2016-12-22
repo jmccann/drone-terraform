@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 
 	"github.com/Sirupsen/logrus"
@@ -79,6 +80,12 @@ func main() {
 			Usage:  "targets to run apply or plan on",
 			EnvVar: "PLUGIN_TARGETS",
 		},
+
+		cli.StringFlag{
+			Name:   "submodules",
+			Usage:  "submodules to override",
+			EnvVar: "PLUGIN_SUBMODULES",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -111,6 +118,13 @@ func run(c *cli.Context) error {
 		}
 	}
 
+	var submodules map[string]map[string]string
+	if c.String("submodules") != "" {
+		if err := json.Unmarshal([]byte(c.String("submodules")), &submodules); err != nil {
+			panic(err)
+		}
+	}
+
 	plugin := Plugin{
 		Config: Config{
 			Remote:      remote,
@@ -123,6 +137,7 @@ func run(c *cli.Context) error {
 			RootDir:     c.String("root_dir"),
 			Parallelism: c.Int("parallelism"),
 			Targets:     c.StringSlice("targets"),
+			Submodules:  submodules,
 		},
 	}
 

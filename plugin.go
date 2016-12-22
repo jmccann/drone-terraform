@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -8,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"os/exec"
 	"strings"
@@ -26,6 +28,7 @@ type (
 		RootDir     string
 		Parallelism int
 		Targets     []string
+		Submodules  map[string]map[string]string
 	}
 
 	Remote struct {
@@ -45,6 +48,15 @@ func (p Plugin) Exec() error {
 
 	var commands []*exec.Cmd
 	remote := p.Config.Remote
+
+	if len(p.Config.Secrets) != 0 {
+		exportSecrets(p.Config.Secrets)
+	}
+
+	if len(p.Config.Submodules) != 0 {
+		submoduleOverride(p.Config.Submodules)
+	}
+
 	if p.Config.Cacert != "" {
 		commands = append(commands, installCaCert(p.Config.Cacert))
 	}
@@ -92,6 +104,36 @@ func installCaCert(cacert string) *exec.Cmd {
 	return exec.Command(
 		"update-ca-certificates",
 	)
+}
+
+func submoduleOverride(submodules map[string]map[string]string) {
+	allOverrides := []string{}
+	for moduleName, override := range submodules {
+		overrideContents := []string{}
+		for k, v := range override {
+			overrideString := fmt.Sprintf(`  %s = "%s"`, k, v)
+			overrideContents = append(overrideContents, overrideString)
+		}
+		moduleContents := fmt.Sprintf(`
+module "%s" {
+%s
+}`, moduleName, strings.Join(overrideContents, "\n"))
+		allOverrides = append(allOverrides, moduleContents)
+	}
+	fileContents := []byte(strings.Join(allOverrides, "\n"))
+	randBytes := make([]byte, 16)
+	rand.Read(randBytes)
+	fileName := hex.EncodeToString(randBytes) + "_override.tf"
+	err := ioutil.WriteFile(fileName, fileContents, 0644)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func exportSecrets(secrets map[string]string) {
+	for k, v := range secrets {
+		os.Setenv(fmt.Sprintf("%s", k), fmt.Sprintf("%s", os.Getenv(v)))
+	}
 }
 
 func deleteCache() *exec.Cmd {
