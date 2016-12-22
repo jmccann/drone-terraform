@@ -131,7 +131,9 @@ func submoduleOverride(submodules map[string]map[string]string) string {
 	fileName := hex.EncodeToString(randBytes) + "_override.tf"
 
 	if err := ioutil.WriteFile(fileName, fileContents, 0644); err != nil {
-		panic(err)
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Fatal("Error writing overrides file!")
 	}
 
 	return fileName
