@@ -50,10 +50,6 @@ func (p Plugin) Exec() error {
 	var commands []*exec.Cmd
 	remote := p.Config.Remote
 
-	if len(p.Config.Secrets) != 0 {
-		exportSecrets(p.Config.Secrets)
-	}
-
 	if len(p.Config.Submodules) != 0 {
 		overridesFileName := submoduleOverride(p.Config.Submodules)
 
@@ -65,15 +61,18 @@ func (p Plugin) Exec() error {
 	if p.Config.Cacert != "" {
 		commands = append(commands, installCaCert(p.Config.Cacert))
 	}
+
 	if remote.Backend != "" {
 		commands = append(commands, deleteCache())
 		commands = append(commands, remoteConfigCommand(remote))
 	}
+
 	commands = append(commands, getModules())
 	commands = append(commands, planCommand(p.Config.Vars, p.Config.Secrets, p.Config.Parallelism, p.Config.Targets))
 	if !p.Config.Plan {
 		commands = append(commands, applyCommand(p.Config.Parallelism, p.Config.Targets))
 	}
+
 	commands = append(commands, deleteCache())
 
 	for _, c := range commands {
@@ -136,12 +135,6 @@ func submoduleOverride(submodules map[string]map[string]string) string {
 	}
 
 	return fileName
-}
-
-func exportSecrets(secrets map[string]string) {
-	for k, v := range secrets {
-		os.Setenv(fmt.Sprintf("%s", k), fmt.Sprintf("%s", os.Getenv(v)))
-	}
 }
 
 func deleteCache() *exec.Cmd {
