@@ -3,17 +3,18 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/Sirupsen/logrus"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sts"
 	"io/ioutil"
 	"math/rand"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/Sirupsen/logrus"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sts"
 )
 
 type (
