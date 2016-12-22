@@ -139,14 +139,6 @@ func submoduleOverride(submodules map[string]map[string]string) string {
 	return fileName
 }
 
-func removeOverridesFile(fileName string) *exec.Cmd {
-	return exec.Command(
-		"rm",
-		"-f",
-		fileName,
-	)
-}
-
 func exportSecrets(secrets map[string]string) {
 	for k, v := range secrets {
 		os.Setenv(fmt.Sprintf("%s", k), fmt.Sprintf("%s", os.Getenv(v)))
