@@ -187,3 +187,33 @@ pipeline:
       app_version: 1.0.0
     parallelism: 2
 ```
+
+## Submodule Overrides
+You may want to override particular configuration values in submodules.
+
+For example, this configuration:
+
+```yaml
+pipeline:
+  terraform:
+    image: jmccann/drone-terraform:0.5
+    plan: false
+    submodules:
+      the-first:
+        source: some:neat://path
+        a-key: key
+      the-second:
+        do-the-thing: true
+    parallelism: 2
+```
+
+will add a file named `<random hex>_override.tf` containing:
+```hcl-terraform
+module "the-first" {
+  source = "some:neat://path"
+  a-key = "key"
+}
+module "the-second" {
+  do-the-thing = true
+}
+```

@@ -1,17 +1,20 @@
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
+	"io/ioutil"
+	"math/rand"
+	"os"
+	"os/exec"
+	"strings"
+	"time"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"io/ioutil"
-	"os"
-	"os/exec"
-	"strings"
-	"time"
 )
 
 type (
@@ -26,6 +29,7 @@ type (
 		RootDir     string
 		Parallelism int
 		Targets     []string
+		Submodules  map[string]map[string]string
 	}
 
 	Remote struct {
@@ -45,18 +49,30 @@ func (p Plugin) Exec() error {
 
 	var commands []*exec.Cmd
 	remote := p.Config.Remote
+
+	if len(p.Config.Submodules) != 0 {
+		overridesFileName := submoduleOverride(p.Config.Submodules)
+
+		if overridesFileName != "" {
+			defer os.Remove(overridesFileName)
+		}
+	}
+
 	if p.Config.Cacert != "" {
 		commands = append(commands, installCaCert(p.Config.Cacert))
 	}
+
 	if remote.Backend != "" {
 		commands = append(commands, deleteCache())
 		commands = append(commands, remoteConfigCommand(remote))
 	}
+
 	commands = append(commands, getModules())
 	commands = append(commands, planCommand(p.Config.Vars, p.Config.Secrets, p.Config.Parallelism, p.Config.Targets))
 	if !p.Config.Plan {
 		commands = append(commands, applyCommand(p.Config.Parallelism, p.Config.Targets))
 	}
+
 	commands = append(commands, deleteCache())
 
 	for _, c := range commands {
@@ -92,6 +108,33 @@ func installCaCert(cacert string) *exec.Cmd {
 	return exec.Command(
 		"update-ca-certificates",
 	)
+}
+
+func submoduleOverride(submodules map[string]map[string]string) string {
+	allOverrides := []string{}
+
+	for moduleName, override := range submodules {
+		overrideContents := []string{}
+		for k, v := range override {
+			overrideContents = append(overrideContents, fmt.Sprintf(`  %s = "%s"`, k, v))
+		}
+		moduleContents := fmt.Sprintf("module \"%s\" {\n%s\n}", moduleName, strings.Join(overrideContents, "\n"))
+		allOverrides = append(allOverrides, moduleContents)
+	}
+
+	fileContents := []byte(strings.Join(allOverrides, "\n"))
+
+	randBytes := make([]byte, 16)
+	rand.Read(randBytes)
+	fileName := hex.EncodeToString(randBytes) + "_override.tf"
+
+	if err := ioutil.WriteFile(fileName, fileContents, 0644); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Fatal("Error writing overrides file!")
+	}
+
+	return fileName
 }
 
 func deleteCache() *exec.Cmd {

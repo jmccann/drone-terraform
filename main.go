@@ -68,16 +68,19 @@ func main() {
 			Usage:  "The number of concurrent operations as Terraform walks its graph",
 			EnvVar: "PLUGIN_PARALLELISM",
 		},
-
 		cli.StringFlag{
 			Name:  "env-file",
 			Usage: "source env file",
 		},
-
 		cli.StringSliceFlag{
 			Name:   "targets",
 			Usage:  "targets to run apply or plan on",
 			EnvVar: "PLUGIN_TARGETS",
+		},
+		cli.StringFlag{
+			Name:   "submodules",
+			Usage:  "submodules to override",
+			EnvVar: "PLUGIN_SUBMODULES",
 		},
 	}
 
@@ -111,6 +114,13 @@ func run(c *cli.Context) error {
 		}
 	}
 
+	var submodules map[string]map[string]string
+	if c.String("submodules") != "" {
+		if err := json.Unmarshal([]byte(c.String("submodules")), &submodules); err != nil {
+			panic(err)
+		}
+	}
+
 	plugin := Plugin{
 		Config: Config{
 			Remote:      remote,
@@ -123,6 +133,7 @@ func run(c *cli.Context) error {
 			RootDir:     c.String("root_dir"),
 			Parallelism: c.Int("parallelism"),
 			Targets:     c.StringSlice("targets"),
+			Submodules:  submodules,
 		},
 	}
 
