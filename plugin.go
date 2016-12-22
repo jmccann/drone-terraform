@@ -54,9 +54,8 @@ func (p Plugin) Exec() error {
 		exportSecrets(p.Config.Secrets)
 	}
 
-	var overridesFileName string
 	if len(p.Config.Submodules) != 0 {
-		overridesFileName = submoduleOverride(p.Config.Submodules)
+		overridesFileName := submoduleOverride(p.Config.Submodules)
 
 		if overridesFileName != "" {
 			defer os.Remove(overridesFileName)
