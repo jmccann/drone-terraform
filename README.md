@@ -39,5 +39,9 @@ Execute from the working directory:
 docker run --rm \
   -v $(pwd):$(pwd) \
   -w $(pwd) \
-  jmccann/drone-terraform --plan
+  jmccann/drone-terraform:1 --plan
 ```
+
+## Drone 0.4
+
+Legacy `drone-terraform` plugin exists @ `jmccann/drone-terraform:0.4`

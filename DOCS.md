@@ -19,7 +19,7 @@ The following is a sample Terraform configuration in your .drone.yml file:
 ```yaml
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:0.5
+    image: jmccann/drone-terraform:1
     plan: false
     remote:
       backend: S3
@@ -45,7 +45,7 @@ CA Certificate.  You can inject your CA Certificate into the plugin by using
 ```yaml
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:0.5
+    image: jmccann/drone-terraform:1
     plan: false
     remote:
       backend: swift
@@ -70,7 +70,7 @@ want command is actually being ran.
 ```yaml
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:0.5
+    image: jmccann/drone-terraform:1
     plan: false
     sensitive: true
     remote:
@@ -90,7 +90,7 @@ You may want to assume another role before running the terraform commands. This 
 ```yaml
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:0.5
+    image: jmccann/drone-terraform:1
     plan: false
     remote:
       backend: S3
@@ -110,7 +110,7 @@ You may want to change directories before applying the terraform commands.  This
 ```yaml
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:0.5
+    image: jmccann/drone-terraform:1
     plan: false
     remote:
       backend: S3
@@ -132,7 +132,7 @@ Single target:
 ```yaml
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:0.5
+    image: jmccann/drone-terraform:1
     plan: false
     targets: aws_security_group.generic_sg
     remote:
@@ -151,7 +151,7 @@ Multiple targets:
 ```yaml
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:0.5
+    image: jmccann/drone-terraform:1
     plan: false
     targets:
       - aws_security_group.generic_sg
@@ -174,7 +174,7 @@ If you want to change Terraform's default parallelism (currently equal to 10) th
 ```yaml
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:0.5
+    image: jmccann/drone-terraform:1
     plan: false
     remote:
       backend: S3
