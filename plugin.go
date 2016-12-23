@@ -44,6 +44,11 @@ func (p Plugin) Exec() error {
 	}
 
 	var commands []*exec.Cmd
+
+	if len(p.Config.Secrets) != 0 {
+		exportSecrets(p.Config.Secrets)
+	}
+
 	remote := p.Config.Remote
 	if p.Config.Cacert != "" {
 		commands = append(commands, installCaCert(p.Config.Cacert))
@@ -92,6 +97,12 @@ func installCaCert(cacert string) *exec.Cmd {
 	return exec.Command(
 		"update-ca-certificates",
 	)
+}
+
+func exportSecrets(secrets map[string]string) {
+	for k, v := range secrets {
+		os.Setenv(fmt.Sprintf("%s", k), fmt.Sprintf("%s", os.Getenv(v)))
+	}
 }
 
 func deleteCache() *exec.Cmd {
