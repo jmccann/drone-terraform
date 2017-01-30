@@ -58,6 +58,7 @@ func (p Plugin) Exec() error {
 		commands = append(commands, remoteConfigCommand(remote))
 	}
 	commands = append(commands, getModules())
+	commands = append(commands, validateCommand())
 	commands = append(commands, planCommand(p.Config.Vars, p.Config.Secrets, p.Config.Parallelism, p.Config.Targets))
 	if !p.Config.Plan {
 		commands = append(commands, applyCommand(p.Config.Parallelism, p.Config.Targets))
@@ -132,6 +133,16 @@ func getModules() *exec.Cmd {
 	return exec.Command(
 		"terraform",
 		"get",
+	)
+}
+
+func validateCommand() *exec.Cmd {
+	args := []string{
+		"validate",
+	}
+	return exec.Command(
+		"terraform",
+		args...,
 	)
 }
 
