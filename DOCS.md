@@ -188,6 +188,10 @@ vars
 : a map of variables to pass to the Terraform `plan` and `apply` commands.
 Each value is passed as a `-var <key>=<value>` option.
 
+var_files
+: a list of variable files to pass to the Terraform `plan` and `apply` commands.
+Each value is passed as a `-var-file <value>` option.
+
 secrets
 : a map of variables to pass to the Terraform `plan` and `apply` commands as well as setting envvars.
 The `key` is the var and ENV to set.  The `value` is the ENV to read the value from.

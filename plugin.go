@@ -2,16 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sts"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/Sirupsen/logrus"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sts"
 )
 
 type (
@@ -26,6 +27,7 @@ type (
 		RootDir     string
 		Parallelism int
 		Targets     []string
+		VarFiles    []string
 	}
 
 	Remote struct {
@@ -59,7 +61,7 @@ func (p Plugin) Exec() error {
 	}
 	commands = append(commands, getModules())
 	commands = append(commands, validateCommand())
-	commands = append(commands, planCommand(p.Config.Vars, p.Config.Secrets, p.Config.Parallelism, p.Config.Targets))
+	commands = append(commands, planCommand(p.Config.Vars, p.Config.Secrets, p.Config.Parallelism, p.Config.Targets, p.Config.VarFiles))
 	if !p.Config.Plan {
 		commands = append(commands, applyCommand(p.Config.Parallelism, p.Config.Targets))
 	}
@@ -146,13 +148,16 @@ func validateCommand() *exec.Cmd {
 	)
 }
 
-func planCommand(variables map[string]string, secrets map[string]string, parallelism int, targets []string) *exec.Cmd {
+func planCommand(variables map[string]string, secrets map[string]string, parallelism int, targets []string, varFiles []string) *exec.Cmd {
 	args := []string{
 		"plan",
 		"-out=plan.tfout",
 	}
 	for _, v := range targets {
 		args = append(args, "--target", fmt.Sprintf("%s", v))
+	}
+	for _, v := range varFiles {
+		args = append(args, "-var-file", fmt.Sprintf("%s", v))
 	}
 	for k, v := range variables {
 		args = append(args, "-var")
