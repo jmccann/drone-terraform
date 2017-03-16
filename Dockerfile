@@ -4,7 +4,7 @@
 
 FROM alpine:3.5
 
-ENV TERRAFORM_VERSION 0.8.7
+ENV TERRAFORM_VERSION 0.8.8
 
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" | tee -a /etc/apk/repositories && \
   apk -U add \
