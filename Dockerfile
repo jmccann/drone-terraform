@@ -4,12 +4,16 @@
 
 FROM alpine:3.4
 
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" | tee -a /etc/apk/repositories && \
-  apk -U add \
+RUN apk -U add \
     ca-certificates \
     git \
-    terraform && \
+    wget && \
   rm -rf /var/cache/apk/*
+
+ENV TERRAFORM_VERSION 0.8.8
+RUN wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -O terraform.zip && \
+  unzip terraform.zip -d /bin && \
+  rm -f terraform.zip
 
 ADD drone-terraform /bin/
 ENTRYPOINT ["/bin/drone-terraform"]
