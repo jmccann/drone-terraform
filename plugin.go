@@ -58,6 +58,7 @@ func (p Plugin) Exec() error {
 		commands = append(commands, remoteConfigCommand(remote))
 	}
 	commands = append(commands, getModules())
+        commands = append(commands, initCommand())
 	commands = append(commands, validateCommand())
 	commands = append(commands, planCommand(p.Config.Vars, p.Config.Secrets, p.Config.Parallelism, p.Config.Targets))
 	if !p.Config.Plan {
@@ -102,7 +103,7 @@ func installCaCert(cacert string) *exec.Cmd {
 
 func exportSecrets(secrets map[string]string) {
 	for k, v := range secrets {
-		os.Setenv(fmt.Sprintf("%s", k), fmt.Sprintf("%s", os.Getenv(v)))
+             os.Setenv(k, v)
 	}
 }
 
@@ -146,8 +147,14 @@ func validateCommand() *exec.Cmd {
 	)
 }
 
+func initCommand() * exec.Cmd {
+   return exec.Command("terraform", "init",)
+}
+
+
 func planCommand(variables map[string]string, secrets map[string]string, parallelism int, targets []string) *exec.Cmd {
-	args := []string{
+	exportSecrets(secrets)
+        args := []string{
 		"plan",
 		"-out=plan.tfout",
 	}
@@ -157,10 +164,6 @@ func planCommand(variables map[string]string, secrets map[string]string, paralle
 	for k, v := range variables {
 		args = append(args, "-var")
 		args = append(args, fmt.Sprintf("%s=%s", k, v))
-	}
-	for k, v := range secrets {
-		args = append(args, "-var")
-		args = append(args, fmt.Sprintf("%s=%s", k, os.Getenv(v)))
 	}
 	if parallelism > 0 {
 		args = append(args, fmt.Sprintf("-parallelism=%d", parallelism))
