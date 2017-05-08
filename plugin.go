@@ -88,10 +88,6 @@ func (p Plugin) Exec() error {
 			trace(c)
 		}
 
-		logrus.WithFields(logrus.Fields{
-			"command": c.Args,
-		}).Debug("Running")
-
 		err := c.Run()
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
