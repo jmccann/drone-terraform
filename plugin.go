@@ -130,7 +130,7 @@ func initCommand(config InitOptions) *exec.Cmd {
 		args = append(args, fmt.Sprintf("-backend-config=%s", config.BackendConfig))
 	}
 
-	// Fasle is default
+	// False is default
 	if config.Lock != nil {
 		args = append(args, fmt.Sprintf("-lock=%t", *config.Lock))
 	}
