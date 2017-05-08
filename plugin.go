@@ -2,24 +2,25 @@ package main
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sts"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/Sirupsen/logrus"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sts"
 )
 
 type (
 	Config struct {
-		Remote      Remote
 		Plan        bool
 		Vars        map[string]string
 		Secrets     map[string]string
+		InitOptions InitOptions
 		Cacert      string
 		Sensitive   bool
 		RoleARN     string
@@ -31,6 +32,12 @@ type (
 	Remote struct {
 		Backend string            `json:"backend"`
 		Config  map[string]string `json:"config"`
+	}
+
+	InitOptions struct {
+		BackendConfig string `json:"backend_config"`
+		Lock          *bool  `json:"lock_state"`
+		LockTimeout   string `json:"lock_timeout"`
 	}
 
 	Plugin struct {
@@ -49,14 +56,14 @@ func (p Plugin) Exec() error {
 		exportSecrets(p.Config.Secrets)
 	}
 
-	remote := p.Config.Remote
 	if p.Config.Cacert != "" {
 		commands = append(commands, installCaCert(p.Config.Cacert))
 	}
-	if remote.Backend != "" {
-		commands = append(commands, deleteCache())
-		commands = append(commands, remoteConfigCommand(remote))
-	}
+
+	commands = append(commands, deleteCache())
+
+	commands = append(commands, initCommand(p.Config.InitOptions))
+
 	commands = append(commands, getModules())
 	commands = append(commands, validateCommand())
 	commands = append(commands, planCommand(p.Config.Vars, p.Config.Secrets, p.Config.Parallelism, p.Config.Targets))
@@ -80,6 +87,10 @@ func (p Plugin) Exec() error {
 		if !p.Config.Sensitive {
 			trace(c)
 		}
+
+		logrus.WithFields(logrus.Fields{
+			"command": c.Args,
+		}).Debug("Running")
 
 		err := c.Run()
 		if err != nil {
@@ -114,15 +125,28 @@ func deleteCache() *exec.Cmd {
 	)
 }
 
-func remoteConfigCommand(config Remote) *exec.Cmd {
+func initCommand(config InitOptions) *exec.Cmd {
 	args := []string{
-		"remote",
-		"config",
-		fmt.Sprintf("-backend=%s", config.Backend),
+		"init",
 	}
-	for k, v := range config.Config {
-		args = append(args, fmt.Sprintf("-backend-config=%s=%s", k, v))
+
+	if config.BackendConfig != "" {
+		args = append(args, fmt.Sprintf("-backend-config=%s", config.BackendConfig))
 	}
+
+	// Fasle is default
+	if config.Lock != nil {
+		args = append(args, fmt.Sprintf("-lock=%t", *config.Lock))
+	}
+
+	// "0s" is default
+	if config.LockTimeout != "" {
+		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.LockTimeout))
+	}
+
+	// Fail Terraform execution on prompt
+	args = append(args, "-input=false")
+
 	return exec.Command(
 		"terraform",
 		args...,
