@@ -79,6 +79,12 @@ func main() {
 			Usage:  "targets to run apply or plan on",
 			EnvVar: "PLUGIN_TARGETS",
 		},
+
+		cli.StringSliceFlag{
+			Name:   "var_files",
+			Usage:  "a list of var files to use. Each value is passed as -var-file=<value>",
+			EnvVar: "PLUGIN_VAR_FILES",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -123,6 +129,7 @@ func run(c *cli.Context) error {
 			RootDir:     c.String("root_dir"),
 			Parallelism: c.Int("parallelism"),
 			Targets:     c.StringSlice("targets"),
+			VarFiles:    c.StringSlice("var_files"),
 		},
 	}
 
