@@ -61,9 +61,9 @@ func (p Plugin) Exec() error {
 	}
 	commands = append(commands, getModules())
 	commands = append(commands, validateCommand())
-	commands = append(commands, planCommand(p.Config.Vars, p.Config.Secrets, p.Config.Parallelism, p.Config.Targets, p.Config.VarFiles))
+	commands = append(commands, planCommand(p.Config))
 	if !p.Config.Plan {
-		commands = append(commands, applyCommand(p.Config.Parallelism, p.Config.Targets))
+		commands = append(commands, applyCommand(p.Config))
 	}
 	commands = append(commands, deleteCache())
 
@@ -148,27 +148,27 @@ func validateCommand() *exec.Cmd {
 	)
 }
 
-func planCommand(variables map[string]string, secrets map[string]string, parallelism int, targets []string, varFiles []string) *exec.Cmd {
+func planCommand(config Config) *exec.Cmd {
 	args := []string{
 		"plan",
 		"-out=plan.tfout",
 	}
-	for _, v := range targets {
+	for _, v := range config.Targets {
 		args = append(args, "--target", fmt.Sprintf("%s", v))
 	}
-	for _, v := range varFiles {
+	for _, v := range config.VarFiles {
 		args = append(args, "-var-file", fmt.Sprintf("%s", v))
 	}
-	for k, v := range variables {
+	for k, v := range config.Vars {
 		args = append(args, "-var")
 		args = append(args, fmt.Sprintf("%s=%s", k, v))
 	}
-	for k, v := range secrets {
+	for k, v := range config.Secrets {
 		args = append(args, "-var")
 		args = append(args, fmt.Sprintf("%s=%s", k, os.Getenv(v)))
 	}
-	if parallelism > 0 {
-		args = append(args, fmt.Sprintf("-parallelism=%d", parallelism))
+	if config.Parallelism > 0 {
+		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
 	}
 	return exec.Command(
 		"terraform",
@@ -176,15 +176,15 @@ func planCommand(variables map[string]string, secrets map[string]string, paralle
 	)
 }
 
-func applyCommand(parallelism int, targets []string) *exec.Cmd {
+func applyCommand(config Config) *exec.Cmd {
 	args := []string{
 		"apply",
 	}
-	for _, v := range targets {
+	for _, v := range config.Targets {
 		args = append(args, "--target", fmt.Sprintf("%s", v))
 	}
-	if parallelism > 0 {
-		args = append(args, fmt.Sprintf("-parallelism=%d", parallelism))
+	if config.Parallelism > 0 {
+		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
 	}
 	args = append(args, "plan.tfout")
 	return exec.Command(
