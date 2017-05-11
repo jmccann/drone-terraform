@@ -31,7 +31,7 @@ type (
 
 	InitOptions struct {
 		BackendConfig string `json:"backend-config"`
-		Lock          *bool  `json:"lock-state"`
+		Lock          *bool  `json:"lock"`
 		LockTimeout   string `json:"lock-timeout"`
 	}
 
@@ -125,12 +125,12 @@ func initCommand(config InitOptions) *exec.Cmd {
 		args = append(args, fmt.Sprintf("-backend-config=%s", config.BackendConfig))
 	}
 
-	// False is default
+	// True is default in TF
 	if config.Lock != nil {
 		args = append(args, fmt.Sprintf("-lock=%t", *config.Lock))
 	}
 
-	// "0s" is default
+	// "0s" is default in TF
 	if config.LockTimeout != "" {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.LockTimeout))
 	}
