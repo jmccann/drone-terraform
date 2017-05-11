@@ -29,11 +29,6 @@ type (
 		Targets     []string
 	}
 
-	Remote struct {
-		Backend string            `json:"backend"`
-		Config  map[string]string `json:"config"`
-	}
-
 	InitOptions struct {
 		BackendConfig string `json:"backend-config"`
 		Lock          *bool  `json:"lock-state"`

@@ -95,9 +95,6 @@ func run(c *cli.Context) error {
 		_ = godotenv.Load(c.String("env-file"))
 	}
 
-	remote := Remote{}
-	json.Unmarshal([]byte(c.String("remote")), &remote)
-
 	var vars map[string]string
 	if c.String("vars") != "" {
 		if err := json.Unmarshal([]byte(c.String("vars")), &vars); err != nil {
