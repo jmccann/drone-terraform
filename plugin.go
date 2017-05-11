@@ -35,9 +35,9 @@ type (
 	}
 
 	InitOptions struct {
-		BackendConfig string `json:"backend_config"`
-		Lock          *bool  `json:"lock_state"`
-		LockTimeout   string `json:"lock_timeout"`
+		BackendConfig string `json:"backend-config"`
+		Lock          *bool  `json:"lock-state"`
+		LockTimeout   string `json:"lock-timeout"`
 	}
 
 	Plugin struct {
