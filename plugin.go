@@ -17,10 +17,10 @@ import (
 
 type (
 	Config struct {
-		Remote      Remote
 		Plan        bool
 		Vars        map[string]string
 		Secrets     map[string]string
+		InitOptions InitOptions
 		Cacert      string
 		Sensitive   bool
 		RoleARN     string
@@ -30,9 +30,10 @@ type (
 		VarFiles    []string
 	}
 
-	Remote struct {
-		Backend string            `json:"backend"`
-		Config  map[string]string `json:"config"`
+	InitOptions struct {
+		BackendConfig string `json:"backend-config"`
+		Lock          *bool  `json:"lock"`
+		LockTimeout   string `json:"lock-timeout"`
 	}
 
 	Plugin struct {
@@ -51,14 +52,14 @@ func (p Plugin) Exec() error {
 		exportSecrets(p.Config.Secrets)
 	}
 
-	remote := p.Config.Remote
 	if p.Config.Cacert != "" {
 		commands = append(commands, installCaCert(p.Config.Cacert))
 	}
-	if remote.Backend != "" {
-		commands = append(commands, deleteCache())
-		commands = append(commands, remoteConfigCommand(remote))
-	}
+
+	commands = append(commands, deleteCache())
+
+	commands = append(commands, initCommand(p.Config.InitOptions))
+
 	commands = append(commands, getModules())
 	commands = append(commands, validateCommand())
 	commands = append(commands, planCommand(p.Config))
@@ -116,15 +117,28 @@ func deleteCache() *exec.Cmd {
 	)
 }
 
-func remoteConfigCommand(config Remote) *exec.Cmd {
+func initCommand(config InitOptions) *exec.Cmd {
 	args := []string{
-		"remote",
-		"config",
-		fmt.Sprintf("-backend=%s", config.Backend),
+		"init",
 	}
-	for k, v := range config.Config {
-		args = append(args, fmt.Sprintf("-backend-config=%s=%s", k, v))
+
+	if config.BackendConfig != "" {
+		args = append(args, fmt.Sprintf("-backend-config=%s", config.BackendConfig))
 	}
+
+	// True is default in TF
+	if config.Lock != nil {
+		args = append(args, fmt.Sprintf("-lock=%t", *config.Lock))
+	}
+
+	// "0s" is default in TF
+	if config.LockTimeout != "" {
+		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.LockTimeout))
+	}
+
+	// Fail Terraform execution on prompt
+	args = append(args, "-input=false")
+
 	return exec.Command(
 		"terraform",
 		args...,

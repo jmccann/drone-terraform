@@ -29,9 +29,9 @@ func main() {
 			EnvVar: "PLUGIN_PLAN",
 		},
 		cli.StringFlag{
-			Name:   "remote",
-			Usage:  "contains the configuration for the Terraform remote state tracking",
-			EnvVar: "PLUGIN_REMOTE",
+			Name:   "init_options",
+			Usage:  "options for the init command. See https://www.terraform.io/docs/commands/init.html",
+			EnvVar: "PLUGIN_INIT_OPTIONS",
 		},
 		cli.StringFlag{
 			Name:   "vars",
@@ -101,9 +101,6 @@ func run(c *cli.Context) error {
 		_ = godotenv.Load(c.String("env-file"))
 	}
 
-	remote := Remote{}
-	json.Unmarshal([]byte(c.String("remote")), &remote)
-
 	var vars map[string]string
 	if c.String("vars") != "" {
 		if err := json.Unmarshal([]byte(c.String("vars")), &vars); err != nil {
@@ -117,12 +114,15 @@ func run(c *cli.Context) error {
 		}
 	}
 
+	initOptions := InitOptions{}
+	json.Unmarshal([]byte(c.String("init_options")), &initOptions)
+
 	plugin := Plugin{
 		Config: Config{
-			Remote:      remote,
 			Plan:        c.Bool("plan"),
 			Vars:        vars,
 			Secrets:     secrets,
+			InitOptions: initOptions,
 			Cacert:      c.String("ca_cert"),
 			Sensitive:   c.Bool("sensitive"),
 			RoleARN:     c.String("role_arn_to_assume"),
