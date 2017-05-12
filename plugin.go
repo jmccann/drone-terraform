@@ -31,9 +31,9 @@ type (
 	}
 
 	InitOptions struct {
-		BackendConfig string `json:"backend-config"`
-		Lock          *bool  `json:"lock"`
-		LockTimeout   string `json:"lock-timeout"`
+		BackendConfig []string `json:"backend-config"`
+		Lock          *bool    `json:"lock"`
+		LockTimeout   string   `json:"lock-timeout"`
 	}
 
 	Plugin struct {
@@ -122,8 +122,9 @@ func initCommand(config InitOptions) *exec.Cmd {
 		"init",
 	}
 
-	if config.BackendConfig != "" {
-		args = append(args, fmt.Sprintf("-backend-config=%s", config.BackendConfig))
+	fmt.Printf("config.BackendConfig: %v\n", config.BackendConfig)
+	for _, v := range config.BackendConfig {
+		args = append(args, fmt.Sprintf("-backend-config=%s", v))
 	}
 
 	// True is default in TF
