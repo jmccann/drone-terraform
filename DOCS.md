@@ -54,19 +54,27 @@ pipeline:
 +   sensitive: true
 ```
 
-Example configuration with state tracked via remote:
+Example configuration with state tracked via remote.  You will need a file
+that specifies the backend type along with ability to pass options via the `.drone.yml`.
 
+`backend.tf`
+```
+terraform {
+  backend "s3" {}
+}
+```
+
+`.drone.yml`
 ```diff
 pipeline:
   terraform:
     image: jmccann/drone-terraform:1
     plan: false
-+   remote:
-+     backend: S3
-+     config:
-+       bucket: my-terraform-config-bucket
-+       key: tf-states/my-project
-+       region: us-east-1
++   init_options:
++     backend-config:
++       - "bucket=my-terraform-config-bucket"
++       - "key=tf-states/my-project"
++       - "region=us-east-1"
 ```
 
 You may want to run terraform against internal resources, like an internal
@@ -145,12 +153,11 @@ pipeline:
   dev_terraform:
     image: jmccann/drone-terraform:1
     plan: false
-    remote:
-      backend: S3
-      config:
-        bucket: my-terraform-config-bucket
-        key: tf-states/my-project
-        region: us-east-1
+    init_options:
+      backend_config:
+        - "bucket=my-terraform-config-bucket"
+        - "key=tf-states/my-project"
+        - "region=us-east-1"
 +   secrets:
 +     AWS_ACCESS_KEY_ID: DEV_AWS_ACCESS_KEY_ID
 +     AWS_SECRET_ACCESS_KEY: DEV_AWS_SECRET_ACCESS_KEY
@@ -158,12 +165,11 @@ pipeline:
   prod_terraform:
     image: jmccann/drone-terraform:1
     plan: false
-    remote:
-      backend: S3
-      config:
-        bucket: my-terraform-config-bucket
-        key: tf-states/my-project
-        region: us-east-1
+    init_options:
+      backend_config:
+        - "bucket=my-terraform-config-bucket"
+        - "key=tf-states/my-project"
+        - "region=us-east-1"
 +   secrets:
 +     AWS_ACCESS_KEY_ID: PROD_AWS_ACCESS_KEY_ID
 +     AWS_SECRET_ACCESS_KEY: PROD_AWS_SECRET_ACCESS_KEY
@@ -174,15 +180,19 @@ pipeline:
 plan
 : if true, calculates a plan but does __NOT__ apply it.
 
-remote
-: contains the configuration for the Terraform remote state tracking.
+init_options
+: contains the configuration for the Terraform backend.
 
-remote.backend
-: the Terraform remote state backend to use.
+init_options.backend-config
+: This specifies additional configuration to merge for the backend. This can be
+specified multiple times. Flags specified later in the line override those
+specified earlier if they conflict.
 
-remote.config
-: a map of configuration parameters for the remote state backend.
-Each value is passed as a `-backend-config=<key>=<value>` option.
+init_options.lock
+: Lock the state file when locking is supported.
+
+init_options.lock-timeout
+: Duration to retry a state lock.
 
 vars
 : a map of variables to pass to the Terraform `plan` and `apply` commands.
