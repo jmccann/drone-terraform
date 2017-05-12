@@ -54,17 +54,10 @@ pipeline:
 +   sensitive: true
 ```
 
-Example configuration with state tracked via remote.  You will need a file
-that specifies the backend type along with ability to pass options via the `.drone.yml`.
+Example configuration with state tracked via remote.  You will need a
+[backend configuration](https://www.terraform.io/docs/backends/config.html)
+specified in a `.tf` file.  You can then pass additional options via the `.drone.yml`.
 
-`backend.tf`
-```
-terraform {
-  backend "s3" {}
-}
-```
-
-`.drone.yml`
 ```diff
 pipeline:
   terraform:
