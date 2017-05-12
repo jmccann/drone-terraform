@@ -122,7 +122,6 @@ func initCommand(config InitOptions) *exec.Cmd {
 		"init",
 	}
 
-	fmt.Printf("config.BackendConfig: %v\n", config.BackendConfig)
 	for _, v := range config.BackendConfig {
 		args = append(args, fmt.Sprintf("-backend-config=%s", v))
 	}
