@@ -37,8 +37,9 @@ pipeline:
   terraform:
     image: jmccann/drone-terraform:1
     plan: false
-+   secrets:
++   terraform_secrets:
 +     my_secret: TERRAFORM_SECRET
++   secrets: [ TERRAFORM_SECRET ]
 ```
 
 You may be passing sensitive vars to your terraform commands.  If you do not want
@@ -151,9 +152,10 @@ pipeline:
         - "bucket=my-terraform-config-bucket"
         - "key=tf-states/my-project"
         - "region=us-east-1"
-+   secrets:
++   terraform_secrets:
 +     AWS_ACCESS_KEY_ID: DEV_AWS_ACCESS_KEY_ID
 +     AWS_SECRET_ACCESS_KEY: DEV_AWS_SECRET_ACCESS_KEY
++   secrets: [DEV_AWS_ACCESS_KEY_ID, DEV_AWS_SECRET_ACCESS_KEY]
 
   prod_terraform:
     image: jmccann/drone-terraform:1
@@ -163,9 +165,10 @@ pipeline:
         - "bucket=my-terraform-config-bucket"
         - "key=tf-states/my-project"
         - "region=us-east-1"
-+   secrets:
++   terraform_secrets:
 +     AWS_ACCESS_KEY_ID: PROD_AWS_ACCESS_KEY_ID
 +     AWS_SECRET_ACCESS_KEY: PROD_AWS_SECRET_ACCESS_KEY
++   secrets: [PROD_AWS_ACCESS_KEY_ID, PROD_AWS_SECRET_ACCESS_KEY]
 ```
 
 # Parameter Reference
@@ -195,7 +198,7 @@ var_files
 : a list of variable files to pass to the Terraform `plan` and `apply` commands.
 Each value is passed as a `-var-file <value>` option.
 
-secrets
+terraform_secrets
 : a map of variables to pass to the Terraform `plan` and `apply` commands as well as setting envvars.
 The `key` is the var and ENV to set.  The `value` is the ENV to read the value from.
 * Each entry generate a terraform var as follows: `-var <key>=$<value>`
