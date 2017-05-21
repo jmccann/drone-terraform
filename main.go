@@ -39,9 +39,9 @@ func main() {
 			EnvVar: "PLUGIN_VARS",
 		},
 		cli.StringFlag{
-			Name:   "secrets",
+			Name:   "terraform_secrets",
 			Usage:  "a map of secrets to pass to the Terraform `plan` and `apply` commands. Each value is passed as a `<key>=<ENV>` option",
-			EnvVar: "PLUGIN_SECRETS",
+			EnvVar: "PLUGIN_TERRAFORM_SECRETS",
 		},
 		cli.StringFlag{
 			Name:   "ca_cert",
@@ -108,8 +108,8 @@ func run(c *cli.Context) error {
 		}
 	}
 	var secrets map[string]string
-	if c.String("secrets") != "" {
-		if err := json.Unmarshal([]byte(c.String("secrets")), &secrets); err != nil {
+	if c.String("terraform_secrets") != "" {
+		if err := json.Unmarshal([]byte(c.String("terraform_secrets")), &secrets); err != nil {
 			panic(err)
 		}
 	}
