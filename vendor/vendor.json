@@ -145,6 +145,12 @@
 			"revisionTime": "2016-10-07T22:43:33Z"
 		},
 		{
+			"checksumSHA1": "ip3Xz/dILw2RMM6Z0MzAj5TUZ/c=",
+			"path": "github.com/franela/goblin",
+			"revision": "2fa789fd0c6b7975acbfb89a04830b4081a7b0e9",
+			"revisionTime": "2017-01-11T05:10:28Z"
+		},
+		{
 			"checksumSHA1": "cVyhKIRI2gQrgpn5qrBeAqErmWM=",
 			"path": "github.com/go-ini/ini",
 			"revision": "6e4869b434bd001f6983749881c7ead3545887d8",
@@ -175,5 +181,5 @@
 			"revisionTime": "2016-10-06T02:47:49Z"
 		}
 	],
-	"rootPath": "github.com/drone-plugins/drone-terraform"
+	"rootPath": "github.com/jmccann/drone-terraform"
 }
