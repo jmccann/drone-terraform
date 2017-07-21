@@ -1,6 +1,12 @@
 # Docker image for the Drone Terraform plugin
 #
 #     docker build --rm=true -t jmccann/drone-terraform:latest .
+FROM golang:1.8-alpine AS builder
+COPY ./*.go ./src/
+COPY ./vendor/ ./src/
+RUN set -ex \
+    && cd ./src \
+    && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -o /go/bin/drone-terraform
 
 FROM alpine:3.4
 
@@ -15,5 +21,5 @@ RUN wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraf
   unzip terraform.zip -d /bin && \
   rm -f terraform.zip
 
-ADD drone-terraform /bin/
+COPY --from=builder /go/bin/drone-terraform /bin/
 ENTRYPOINT ["/bin/drone-terraform"]
