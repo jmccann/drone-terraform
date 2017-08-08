@@ -16,6 +16,7 @@ import (
 )
 
 type (
+	// Config holds input parameters for the plugin
 	Config struct {
 		Plan        bool
 		Vars        map[string]string
@@ -28,19 +29,23 @@ type (
 		Parallelism int
 		Targets     []string
 		VarFiles    []string
+		Destroy     bool
 	}
 
+	// InitOptions include options for the Terraform's init command
 	InitOptions struct {
 		BackendConfig []string `json:"backend-config"`
 		Lock          *bool    `json:"lock"`
 		LockTimeout   string   `json:"lock-timeout"`
 	}
 
+	// Plugin represents the plugin instance to be executed
 	Plugin struct {
 		Config Config
 	}
 )
 
+// Exec executes the plugin
 func (p Plugin) Exec() error {
 	if p.Config.RoleARN != "" {
 		assumeRole(p.Config.RoleARN)
@@ -64,7 +69,7 @@ func (p Plugin) Exec() error {
 	commands = append(commands, validateCommand())
 	commands = append(commands, planCommand(p.Config))
 	if !p.Config.Plan {
-		commands = append(commands, applyCommand(p.Config))
+		commands = append(commands, terraformCommand(p.Config))
 	}
 	commands = append(commands, deleteCache())
 
@@ -165,8 +170,13 @@ func validateCommand() *exec.Cmd {
 func planCommand(config Config) *exec.Cmd {
 	args := []string{
 		"plan",
-		"-out=plan.tfout",
 	}
+	if config.Destroy {
+		args = append(args, "-destroy")
+	} else {
+		args = append(args, "-out=plan.tfout")
+	}
+
 	for _, v := range config.Targets {
 		args = append(args, "--target", fmt.Sprintf("%s", v))
 	}
@@ -190,6 +200,14 @@ func planCommand(config Config) *exec.Cmd {
 	)
 }
 
+func terraformCommand(config Config) *exec.Cmd {
+	if config.Destroy {
+		return destroyCommand(config)
+	}
+
+	return applyCommand(config)
+}
+
 func applyCommand(config Config) *exec.Cmd {
 	args := []string{
 		"apply",
@@ -201,6 +219,23 @@ func applyCommand(config Config) *exec.Cmd {
 		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
 	}
 	args = append(args, "plan.tfout")
+	return exec.Command(
+		"terraform",
+		args...,
+	)
+}
+
+func destroyCommand(config Config) *exec.Cmd {
+	args := []string{
+		"destroy",
+	}
+	for _, v := range config.Targets {
+		args = append(args, fmt.Sprintf("-target=%s", v))
+	}
+	if config.Parallelism > 0 {
+		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
+	}
+	args = append(args, "-force")
 	return exec.Command(
 		"terraform",
 		args...,

@@ -85,6 +85,11 @@ func main() {
 			Usage:  "a list of var files to use. Each value is passed as -var-file=<value>",
 			EnvVar: "PLUGIN_VAR_FILES",
 		},
+		cli.BoolFlag{
+			Name:   "destroy",
+			Usage:  "destory all resurces",
+			EnvVar: "PLUGIN_DESTROY",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -130,6 +135,7 @@ func run(c *cli.Context) error {
 			Parallelism: c.Int("parallelism"),
 			Targets:     c.StringSlice("targets"),
 			VarFiles:    c.StringSlice("var_files"),
+			Destroy:     c.Bool("destroy"),
 		},
 	}
 
