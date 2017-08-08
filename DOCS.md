@@ -168,6 +168,16 @@ pipeline:
 +     AWS_SECRET_ACCESS_KEY: PROD_AWS_SECRET_ACCESS_KEY
 ```
 
+Destroying the service can be done using the boolean `destory` option. Keep in mind that Fastly won't allow a service with active version be destoryed. Use `force_destroy` option in the service definition for terraform to handle it.
+
+```yaml
+pipeline:
+  destroy:
+    image: jmccann/drone-terraform:1
+    plan: false
++   destroy: true
+```
+
 # Parameter Reference
 
 plan
@@ -215,3 +225,6 @@ root_dir
 
 parallelism
 : The number of concurrent operations as Terraform walks its graph.
+
+destroy (boolean)
+: Destroys the service (still requires [`force_destroy`](https://www.terraform.io/docs/providers/fastly/r/service_v1.html#force_destroy) option to be set in the service definition)
