@@ -9,11 +9,12 @@ RUN wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraf
   unzip terraform.zip -d /bin && \
   rm -f terraform.zip
 
-FROM scratch
+#TODO: need to add rm to scratch
+#FROM scratch
 
 ENV GODEBUG=netdns=go
-COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=alpine /bin/terraform /bin/terraform
+#COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+#COPY --from=alpine /bin/terraform /bin/terraform
 
 
 
