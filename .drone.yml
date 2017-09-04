@@ -1,6 +1,6 @@
 workspace:
   base: /go
-  path: src/github.com/jmccann/drone-terraform
+  path: src/github.com/${DRONE_REPO}
 
 pipeline:
   test:
@@ -58,7 +58,7 @@ pipeline:
 #  publish_linux_amd64:
 #    image: plugins/docker:17.05
 #    pull: true
-#    repo: jmccann/${DRONE_REPO_NAME}
+#    repo: ${DRONE_REPO}
 #    tags: [ latest, 1.0.0, 1.0, 1 ]
 #    secrets: [ docker_username, docker_password ]
 #    dockerfile: Dockerfile
@@ -69,7 +69,7 @@ pipeline:
 #  publish_linux_arm64:
 #    image: plugins/docker:17.05
 #    pull: true
-#    repo: jmccann/${DRONE_REPO_NAME}
+#    repo: ${DRONE_REPO}
 #    tags: [ linux-arm64 ]
 #    secrets: [ docker_username, docker_password ]
 #    dockerfile: Dockerfile.arm64
@@ -80,7 +80,7 @@ pipeline:
 #  publish_linux_arm:
 #    image: plugins/docker:17.05
 #    pull: true
-#    repo: jmccann/${DRONE_REPO_NAME}
+#    repo: ${DRONE_REPO}
 #    tags: [ linux-arm ]
 #    secrets: [ docker_username, docker_password ]
 #    dockerfile: Dockerfile.arm
@@ -91,7 +91,7 @@ pipeline:
   # publish_windows_amd64:
   #   image: plugins/docker:17.05
   #   pull: true
-  #   repo: jmccann/${DRONE_REPO_NAME}
+  #   repo: ${DRONE_REPO}
   #   tags: [ windows-amd64 ]
   #   secrets: [ docker_username, docker_password ]
   #   dockerfile: Dockerfile.windows
