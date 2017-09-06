@@ -42,17 +42,29 @@ type (
 
 	// Plugin represents the plugin instance to be executed
 	Plugin struct {
-		Config Config
+		Config    Config
+		Terraform Terraform
 	}
 )
 
 // Exec executes the plugin
 func (p Plugin) Exec() error {
+	// Install specified version of terraform
+	if p.Terraform.Version != "" {
+		err := installTerraform(p.Terraform.Version)
+
+		if err != nil {
+			return err
+		}
+	}
+
 	if p.Config.RoleARN != "" {
 		assumeRole(p.Config.RoleARN)
 	}
 
 	var commands []*exec.Cmd
+
+	commands = append(commands, exec.Command("terraform", "version"))
 
 	CopyTfEnv()
 

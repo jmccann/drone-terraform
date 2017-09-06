@@ -90,6 +90,11 @@ func main() {
 			Usage:  "destory all resurces",
 			EnvVar: "PLUGIN_DESTROY",
 		},
+		cli.StringFlag{
+			Name:   "tf.version",
+			Usage:  "terraform version to use",
+			EnvVar: "PLUGIN_TF_VERSION",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -136,6 +141,9 @@ func run(c *cli.Context) error {
 			Targets:     c.StringSlice("targets"),
 			VarFiles:    c.StringSlice("var_files"),
 			Destroy:     c.Bool("destroy"),
+		},
+		Terraform: Terraform{
+			Version: c.String("tf.version"),
 		},
 	}
 

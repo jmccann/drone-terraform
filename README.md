@@ -39,7 +39,7 @@ Execute from the working directory:
 docker run --rm \
   -v $(pwd):$(pwd) \
   -w $(pwd) \
-  jmccann/drone-terraform:1 --plan
+  jmccann/drone-terraform:latest --plan
 ```
 
 ## Drone 0.4
