@@ -76,6 +76,18 @@ pipeline:
 +   sensitive: true
 ```
 
+Example configuration for overriding the terraform version.  This will increase
+plugin execution time as it will download/unpack the version of terraform
+specified instead of using the embedded version that is included.
+
+```diff
+pipeline:
+  terraform:
+    image: jmccann/drone-terraform:1
+    plan: false
++   tf_version: 0.10.3
+```
+
 Example configuration with state tracked via remote.  You will need a
 [backend configuration](https://www.terraform.io/docs/backends/config.html)
 specified in a `.tf` file.  You can then pass additional options via the `.drone.yml`.
