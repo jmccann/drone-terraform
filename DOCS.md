@@ -49,11 +49,18 @@ pipeline:
 
 ```diff
 pipeline:
-  terraform:
+  terraform_1:
     image: jmccann/drone-terraform:1
     plan: false
 +   environment:
 +     TF_VAR_MY_SECRET: ${TERRAFORM_SECRET}
+
+  terraform_2:
+    image: jmccann/drone-terraform:1
+    plan: false
++   sensitive: true
++   vars:
++     my_secret: ${TERRAFORM_SECRET}
 ```
 
 You may be passing sensitive vars to your terraform commands.  If you do not want
