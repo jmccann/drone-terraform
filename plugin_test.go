@@ -143,12 +143,14 @@ func TestPlugin(t *testing.T) {
 			// Set some initial TF_VAR_ that are uppercase
 			os.Setenv("TF_VAR_SOMETHING", "some value")
 			os.Setenv("TF_VAR_SOMETHING_ELSE", "some other value")
+			os.Setenv("TF_VAR_BASE64", "dGVzdA==")
 
 			CopyTfEnv()
 
 			// Make sure new env vars exist with proper values
 			g.Assert(os.Getenv("TF_VAR_something")).Equal("some value")
 			g.Assert(os.Getenv("TF_VAR_something_else")).Equal("some other value")
+			g.Assert(os.Getenv("TF_VAR_base64")).Equal("dGVzdA==")
 		})
 	})
 }

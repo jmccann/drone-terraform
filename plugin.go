@@ -110,7 +110,7 @@ func installCaCert(cacert string) *exec.Cmd {
 func CopyTfEnv() {
 	tfVar := regexp.MustCompile(`^TF_VAR_.*$`)
 	for _, e := range os.Environ() {
-		pair := strings.Split(e, "=")
+		pair := strings.SplitN(e, "=", 2)
 		if tfVar.MatchString(pair[0]) {
 			name := strings.Split(pair[0], "TF_VAR_")
 			os.Setenv(fmt.Sprintf("TF_VAR_%s", strings.ToLower(name[1])), pair[1])
