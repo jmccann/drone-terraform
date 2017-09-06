@@ -29,8 +29,11 @@ pipeline:
 +     app_version: 1.0.0
 ```
 
-Example configuration passing secrets to terraform via `vars`.  The following
-example will call `terraform apply -var my_secret=${TERRAFORM_SECRET}`:
+Example configuration passing secrets to terraform.  Please read
+https://www.terraform.io/docs/configuration/variables.html#environment-variables
+for more details.
+
+**Drone 0.6+**:
 
 ```diff
 pipeline:
@@ -38,7 +41,19 @@ pipeline:
     image: jmccann/drone-terraform:1
     plan: false
 +   secrets:
-+     my_secret: TERRAFORM_SECRET
++     - source: terraform_secret
++       target: tf_var_my_secret
+```
+
+**Drone 0.5**:
+
+```diff
+pipeline:
+  terraform:
+    image: jmccann/drone-terraform:1
+    plan: false
++   environment:
++     TF_VAR_MY_SECRET: ${TERRAFORM_SECRET}
 ```
 
 You may be passing sensitive vars to your terraform commands.  If you do not want
@@ -138,36 +153,6 @@ pipeline:
 +   parallelism: 2
 ```
 
-If you need to set different ENV secrets for multiple `terraform` steps you can utilize `secrets`.
-The following example shows using different remotes secrets each step.
-
-```yaml
-pipeline:
-  dev_terraform:
-    image: jmccann/drone-terraform:1
-    plan: false
-    init_options:
-      backend_config:
-        - "bucket=my-terraform-config-bucket"
-        - "key=tf-states/my-project"
-        - "region=us-east-1"
-+   secrets:
-+     AWS_ACCESS_KEY_ID: DEV_AWS_ACCESS_KEY_ID
-+     AWS_SECRET_ACCESS_KEY: DEV_AWS_SECRET_ACCESS_KEY
-
-  prod_terraform:
-    image: jmccann/drone-terraform:1
-    plan: false
-    init_options:
-      backend_config:
-        - "bucket=my-terraform-config-bucket"
-        - "key=tf-states/my-project"
-        - "region=us-east-1"
-+   secrets:
-+     AWS_ACCESS_KEY_ID: PROD_AWS_ACCESS_KEY_ID
-+     AWS_SECRET_ACCESS_KEY: PROD_AWS_SECRET_ACCESS_KEY
-```
-
 Destroying the service can be done using the boolean `destory` option. Keep in mind that Fastly won't allow a service with active version be destoryed. Use `force_destroy` option in the service definition for terraform to handle it.
 
 ```yaml
@@ -204,12 +189,6 @@ Each value is passed as a `-var <key>=<value>` option.
 var_files
 : a list of variable files to pass to the Terraform `plan` and `apply` commands.
 Each value is passed as a `-var-file <value>` option.
-
-secrets
-: a map of variables to pass to the Terraform `plan` and `apply` commands as well as setting envvars.
-The `key` is the var and ENV to set.  The `value` is the ENV to read the value from.
-* Each entry generate a terraform var as follows: `-var <key>=$<value>`
-* Additionally each entry generate sets and envvar as follows: `key=$value`
 
 ca_cert
 : ca cert to add to your environment to allow terraform to use internal/private resources
