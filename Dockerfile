@@ -16,7 +16,7 @@ RUN apk -U add \
     wget && \
   rm -rf /var/cache/apk/*
 
-ENV TERRAFORM_VERSION 0.9.11
+ENV TERRAFORM_VERSION 0.10.3
 RUN wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -O terraform.zip && \
   unzip terraform.zip -d /bin && \
   rm -f terraform.zip
