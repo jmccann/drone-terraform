@@ -77,7 +77,7 @@ func (p Plugin) Exec() error {
 	commands = append(commands, initCommand(p.Config.InitOptions))
 
 	commands = append(commands, getModules())
-	commands = append(commands, validateCommand())
+	commands = append(commands, validateCommand(p.Config))
 	commands = append(commands, planCommand(p.Config))
 	if !p.Config.Plan {
 		commands = append(commands, terraformCommand(p.Config))
@@ -173,9 +173,13 @@ func getModules() *exec.Cmd {
 	)
 }
 
-func validateCommand() *exec.Cmd {
+func validateCommand(config Config) *exec.Cmd {
 	args := []string{
 		"validate",
+	}
+	for k, v := range config.Vars {
+		args = append(args, "-var")
+		args = append(args, fmt.Sprintf("%s=%s", k, v))
 	}
 	return exec.Command(
 		"terraform",
