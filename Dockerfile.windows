@@ -1,0 +1,13 @@
+FROM microsoft/nanoserver:latest
+
+ENV GODEBUG=netdns=go
+
+ENV TERRAFORM_VERSION 0.10.3
+
+LABEL org.label-schema.version=latest
+LABEL org.label-schema.vcs-url="https://github.com/jmccann/drone-terraform.git"
+LABEL org.label-schema.name="Drone Terraform"
+LABEL org.label-schema.vendor="jmccann"
+
+ADD release/windows/amd64/drone-terraform /bin/
+ENTRYPOINT [ "/bin/drone-terraform" ]

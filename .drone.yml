@@ -1,12 +1,109 @@
 workspace:
   base: /go
-  path: src/github.com/drone-plugins/drone-terraform
+  path: src/github.com/${DRONE_REPO}
 
 pipeline:
   test:
-    image: golang:1.8
+    image: golang:1.9
+    pull: true
+    commands:
+      - go vet
+      - go test -cover -coverprofile=coverage.out
+
+  build_linux_amd64:
+    image: golang:1.9
+    pull: true
+    group: build
     environment:
+      - GOOS=linux
+      - GOARCH=amd64
       - CGO_ENABLED=0
     commands:
-      - go test -cover -coverprofile=coverage.out
-      - go build -ldflags "-s -w -X main.revision=$(git rev-parse HEAD)" -a
+      - go build -v -ldflags "-X main.revision=$(git rev-parse HEAD)" -a -o release/linux/amd64/${DRONE_REPO_NAME}
+
+#  build_linux_arm64:
+#    image: golang:1.9
+#    pull: true
+#    group: build
+#    environment:
+#      - GOOS=linux
+#      - GOARCH=arm64
+#      - CGO_ENABLED=0
+#    commands:
+#      - go build -v -ldflags "-X main.revision=$(git rev-parse HEAD)" -a -o release/linux/arm64/${DRONE_REPO_NAME}
+
+  build_linux_arm:
+    image: golang:1.9
+    pull: true
+    group: build
+    environment:
+      - GOOS=linux
+      - GOARCH=arm
+      - CGO_ENABLED=0
+      - GOARM=7
+    commands:
+      - go build -v -ldflags "-X main.revision=$(git rev-parse HEAD)" -a -o release/linux/arm/${DRONE_REPO_NAME}
+
+  # build_windows_amd64:
+  #   image: golang:1.9-nanoserver
+  #   pull: true
+  #   group: build
+  #   environment:
+  #     - GOOS=windows
+  #     - GOARCH=amd64
+  #     - CGO_ENABLED=0
+  #   commands:
+  #     - go build -v -ldflags "-X main.build=${DRONE_BUILD_NUMBER}" -a -o release/windows/amd64/${DRONE_REPO_NAME}
+
+#  publish_linux_amd64:
+#    image: plugins/docker:17.05
+#    pull: true
+#    repo: ${DRONE_REPO}
+#    tags: [ latest, 1.0.0, 1.0, 1 ]
+#    secrets: [ docker_username, docker_password ]
+#    dockerfile: Dockerfile
+#    when:
+#      branch: master
+#      event: push
+
+#  publish_linux_arm64:
+#    image: plugins/docker:17.05
+#    pull: true
+#    repo: ${DRONE_REPO}
+#    tags: [ linux-arm64 ]
+#    secrets: [ docker_username, docker_password ]
+#    dockerfile: Dockerfile.arm64
+#    when:
+#      branch: master
+#      event: push
+#
+#  publish_linux_arm:
+#    image: plugins/docker:17.05
+#    pull: true
+#    repo: ${DRONE_REPO}
+#    tags: [ linux-arm ]
+#    secrets: [ docker_username, docker_password ]
+#    dockerfile: Dockerfile.arm
+#    when:
+#      branch: master
+#      event: push
+
+  # publish_windows_amd64:
+  #   image: plugins/docker:17.05
+  #   pull: true
+  #   repo: ${DRONE_REPO}
+  #   tags: [ windows-amd64 ]
+  #   secrets: [ docker_username, docker_password ]
+  #   dockerfile: Dockerfile.windows
+  #   when:
+  #     branch: master
+  #     event: push
+
+#  microbadger:
+#    image: plugins/webhook:1
+#    pull: true
+#    secrets: [ webhook_url ]
+#    when:
+#      branch: master
+#      event: push
+#      status: [ success ]

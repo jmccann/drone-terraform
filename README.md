@@ -1,6 +1,10 @@
 # drone-terraform
 
 [![Build Status](http://beta.drone.io/api/badges/jmccann/drone-terraform/status.svg)](http://beta.drone.io/jmccann/drone-terraform)
+[![Join the chat at https://gitter.im/drone/drone](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/drone/drone)
+[![Go Doc](https://godoc.org/github.com/jmccann/drone-terraform?status.svg)](http://godoc.org/github.com/jmccann/drone-terraform)
+[![Go Report](https://goreportcard.com/badge/github.com/jmccann/drone-terraform)](https://goreportcard.com/report/github.com/jmccann/drone-terraform)
+[![](https://images.microbadger.com/badges/image/jmccann/drone-terraform.svg)](https://microbadger.com/images/jmccann/drone-terraform "Get your own image badge on microbadger.com")
 
 Drone plugin to execute Terraform plan and apply. For the usage information and
 a listing of the available options please take a look at [the docs](DOCS.md).
@@ -19,7 +23,7 @@ go test
 Build the docker image with the following commands:
 
 ```
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -o release/linux/amd64/drone-terraform
 docker build --rm=true -t jmccann/drone-terraform .
 ```
 
