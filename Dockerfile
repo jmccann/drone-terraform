@@ -1,6 +1,6 @@
 # Docker image for the Drone Terraform plugin
 #
-#     docker build --rm=true -t jmccann/drone-terraform:latest .
+#     docker build -t jmccann/drone-terraform:latest .
 FROM golang:1.8-alpine AS builder
 COPY ./*.go ./src/
 COPY ./vendor/ ./src/

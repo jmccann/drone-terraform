@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 	"time"
 
@@ -53,9 +54,7 @@ func (p Plugin) Exec() error {
 
 	var commands []*exec.Cmd
 
-	if len(p.Config.Secrets) != 0 {
-		exportSecrets(p.Config.Secrets)
-	}
+	CopyTfEnv()
 
 	if p.Config.Cacert != "" {
 		commands = append(commands, installCaCert(p.Config.Cacert))
@@ -108,9 +107,14 @@ func installCaCert(cacert string) *exec.Cmd {
 	)
 }
 
-func exportSecrets(secrets map[string]string) {
-	for k, v := range secrets {
-		os.Setenv(fmt.Sprintf("%s", k), fmt.Sprintf("%s", os.Getenv(v)))
+func CopyTfEnv() {
+	tfVar := regexp.MustCompile(`^TF_VAR_.*$`)
+	for _, e := range os.Environ() {
+		pair := strings.SplitN(e, "=", 2)
+		if tfVar.MatchString(pair[0]) {
+			name := strings.Split(pair[0], "TF_VAR_")
+			os.Setenv(fmt.Sprintf("TF_VAR_%s", strings.ToLower(name[1])), pair[1])
+		}
 	}
 }
 
@@ -186,10 +190,6 @@ func planCommand(config Config) *exec.Cmd {
 	for k, v := range config.Vars {
 		args = append(args, "-var")
 		args = append(args, fmt.Sprintf("%s=%s", k, v))
-	}
-	for k, v := range config.Secrets {
-		args = append(args, "-var")
-		args = append(args, fmt.Sprintf("%s=%s", k, os.Getenv(v)))
 	}
 	if config.Parallelism > 0 {
 		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
