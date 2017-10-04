@@ -196,10 +196,10 @@ specified multiple times. Flags specified later in the line override those
 specified earlier if they conflict.
 
 init_options.lock
-: Lock the state file when locking is supported.
+: Lock the state file when locking is supported. Default `true`.
 
 init_options.lock-timeout
-: Duration to retry a state lock.
+: Duration to wait for a state lock. Default `0s`.
 
 vars
 : a map of variables to pass to the Terraform `plan` and `apply` commands.
