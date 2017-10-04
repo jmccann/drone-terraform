@@ -210,6 +210,12 @@ func planCommand(config Config) *exec.Cmd {
 	if config.Parallelism > 0 {
 		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
 	}
+	if config.InitOptions.Lock != nil {
+		args = append(args, fmt.Sprintf("-lock=%t", *config.InitOptions.Lock))
+	}
+	if config.InitOptions.LockTimeout != "" {
+		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
+	}
 	return exec.Command(
 		"terraform",
 		args...,
@@ -234,6 +240,12 @@ func applyCommand(config Config) *exec.Cmd {
 	if config.Parallelism > 0 {
 		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
 	}
+	if config.InitOptions.Lock != nil {
+		args = append(args, fmt.Sprintf("-lock=%t", *config.InitOptions.Lock))
+	}
+	if config.InitOptions.LockTimeout != "" {
+		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
+	}
 	args = append(args, "plan.tfout")
 	return exec.Command(
 		"terraform",
@@ -250,6 +262,12 @@ func destroyCommand(config Config) *exec.Cmd {
 	}
 	if config.Parallelism > 0 {
 		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
+	}
+	if config.InitOptions.Lock != nil {
+		args = append(args, fmt.Sprintf("-lock=%t", *config.InitOptions.Lock))
+	}
+	if config.InitOptions.LockTimeout != "" {
+		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
 	args = append(args, "-force")
 	return exec.Command(
