@@ -3,7 +3,7 @@
 [![Build Status](http://beta.drone.io/api/badges/jmccann/drone-terraform/status.svg)](http://beta.drone.io/jmccann/drone-terraform)
 
 Drone plugin to execute Terraform plan and apply. For the usage information and
-a listing of the available options please take a look at [the docs](DOCS.md).
+a listing of the available options please take a look at [the docs](https://github.com/jmccann/drone-terraform/blob/master/DOCS.md).
 
 ## Build
 
