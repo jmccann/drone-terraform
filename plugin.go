@@ -177,6 +177,9 @@ func validateCommand(config Config) *exec.Cmd {
 	args := []string{
 		"validate",
 	}
+	for _, v := range config.VarFiles {
+		args = append(args, "-var-file", fmt.Sprintf("%s", v))
+	}
 	for k, v := range config.Vars {
 		args = append(args, "-var")
 		args = append(args, fmt.Sprintf("%s=%s", k, v))
