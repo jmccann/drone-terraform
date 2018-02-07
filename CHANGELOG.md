@@ -1,3 +1,7 @@
+## 4.0-0.11.3 (2018-02-07)
+* Pass `-var-file` to validate command
+* Update embedded TF to `0.11.3`
+
 ## 4.0-0.10.8 (2018-02-07)
 * Pass `-var-file` to validate command
 * Update embedded TF to `0.10.8`
