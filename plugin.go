@@ -85,10 +85,8 @@ func (p Plugin) Exec() error {
 		case "plan-destroy":
 			commands = append(commands, tfPlan(p.Config, true))
 		case "apply":
-			commands = append(commands, tfPlan(p.Config, false))
 			commands = append(commands, tfApply(p.Config))
 		case "destroy":
-			commands = append(commands, tfPlan(p.Config, true))
 			commands = append(commands, tfDestroy(p.Config))
 		default:
 			return fmt.Errorf("valid actions are: validate, plan, apply, plan-destroy, destroy.  You provided %s", action)
