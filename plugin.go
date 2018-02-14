@@ -132,6 +132,7 @@ func installCaCert(cacert string) *exec.Cmd {
 	)
 }
 
+// CopyTfEnv creates copies of TF_VAR_ to lowercase
 func CopyTfEnv() {
 	tfVar := regexp.MustCompile(`^TF_VAR_.*$`)
 	for _, e := range os.Environ() {
