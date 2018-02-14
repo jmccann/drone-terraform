@@ -91,7 +91,7 @@ func (p Plugin) Exec() error {
 			commands = append(commands, tfPlan(p.Config, true))
 			commands = append(commands, tfDestroy(p.Config))
 		default:
-			return fmt.Errorf("valid actions are: validate, plan, apply, destroy.  You provided %s", action)
+			return fmt.Errorf("valid actions are: validate, plan, apply, plan-destroy, destroy.  You provided %s", action)
 		}
 	}
 
