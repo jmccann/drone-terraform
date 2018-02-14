@@ -19,7 +19,7 @@ import (
 type (
 	// Config holds input parameters for the plugin
 	Config struct {
-		Plan        bool
+		Actions     []string
 		Vars        map[string]string
 		Secrets     map[string]string
 		InitOptions InitOptions
@@ -30,7 +30,6 @@ type (
 		Parallelism int
 		Targets     []string
 		VarFiles    []string
-		Destroy     bool
 	}
 
 	// InitOptions include options for the Terraform's init command
@@ -73,15 +72,29 @@ func (p Plugin) Exec() error {
 	}
 
 	commands = append(commands, deleteCache())
-
 	commands = append(commands, initCommand(p.Config.InitOptions))
-
 	commands = append(commands, getModules())
-	commands = append(commands, validateCommand(p.Config))
-	commands = append(commands, planCommand(p.Config))
-	if !p.Config.Plan {
-		commands = append(commands, terraformCommand(p.Config))
+
+	// Add commands listed from Actions
+	for _, action := range p.Config.Actions {
+		switch action {
+		case "validate":
+			commands = append(commands, tfValidate(p.Config))
+		case "plan":
+			commands = append(commands, tfPlan(p.Config, false))
+		case "plan-destroy":
+			commands = append(commands, tfPlan(p.Config, true))
+		case "apply":
+			commands = append(commands, tfPlan(p.Config, false))
+			commands = append(commands, tfApply(p.Config))
+		case "destroy":
+			commands = append(commands, tfPlan(p.Config, true))
+			commands = append(commands, tfDestroy(p.Config))
+		default:
+			return fmt.Errorf("valid actions are: validate, plan, apply, destroy.  You provided %s", action)
+		}
 	}
+
 	commands = append(commands, deleteCache())
 
 	for _, c := range commands {
@@ -173,7 +186,7 @@ func getModules() *exec.Cmd {
 	)
 }
 
-func validateCommand(config Config) *exec.Cmd {
+func tfValidate(config Config) *exec.Cmd {
 	args := []string{
 		"validate",
 	}
@@ -190,11 +203,12 @@ func validateCommand(config Config) *exec.Cmd {
 	)
 }
 
-func planCommand(config Config) *exec.Cmd {
+func tfPlan(config Config, destroy bool) *exec.Cmd {
 	args := []string{
 		"plan",
 	}
-	if config.Destroy {
+
+	if destroy {
 		args = append(args, "-destroy")
 	} else {
 		args = append(args, "-out=plan.tfout")
@@ -225,15 +239,7 @@ func planCommand(config Config) *exec.Cmd {
 	)
 }
 
-func terraformCommand(config Config) *exec.Cmd {
-	if config.Destroy {
-		return destroyCommand(config)
-	}
-
-	return applyCommand(config)
-}
-
-func applyCommand(config Config) *exec.Cmd {
+func tfApply(config Config) *exec.Cmd {
 	args := []string{
 		"apply",
 	}
@@ -256,7 +262,7 @@ func applyCommand(config Config) *exec.Cmd {
 	)
 }
 
-func destroyCommand(config Config) *exec.Cmd {
+func tfDestroy(config Config) *exec.Cmd {
 	args := []string{
 		"destroy",
 	}

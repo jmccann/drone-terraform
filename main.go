@@ -23,11 +23,6 @@ func main() {
 		// plugin args
 		//
 
-		cli.BoolFlag{
-			Name:   "plan",
-			Usage:  "calculates a plan but does NOT apply it",
-			EnvVar: "PLUGIN_PLAN",
-		},
 		cli.StringFlag{
 			Name:   "init_options",
 			Usage:  "options for the init command. See https://www.terraform.io/docs/commands/init.html",
@@ -85,15 +80,16 @@ func main() {
 			Usage:  "a list of var files to use. Each value is passed as -var-file=<value>",
 			EnvVar: "PLUGIN_VAR_FILES",
 		},
-		cli.BoolFlag{
-			Name:   "destroy",
-			Usage:  "destory all resurces",
-			EnvVar: "PLUGIN_DESTROY",
-		},
 		cli.StringFlag{
 			Name:   "tf.version",
 			Usage:  "terraform version to use",
 			EnvVar: "PLUGIN_TF_VERSION",
+		},
+		cli.StringSliceFlag{
+			Name:   "actions",
+			Usage:  "a list of actions to have terraform perform",
+			EnvVar: "PLUGIN_ACTIONS",
+			Value:  &cli.StringSlice{"validate", "apply"},
 		},
 	}
 
@@ -129,7 +125,7 @@ func run(c *cli.Context) error {
 
 	plugin := Plugin{
 		Config: Config{
-			Plan:        c.Bool("plan"),
+			Actions:    c.StringSlice("actions"),
 			Vars:        vars,
 			Secrets:     secrets,
 			InitOptions: initOptions,
@@ -140,7 +136,6 @@ func run(c *cli.Context) error {
 			Parallelism: c.Int("parallelism"),
 			Targets:     c.StringSlice("targets"),
 			VarFiles:    c.StringSlice("var_files"),
-			Destroy:     c.Bool("destroy"),
 		},
 		Terraform: Terraform{
 			Version: c.String("tf.version"),

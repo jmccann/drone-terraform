@@ -36,7 +36,7 @@ func Test_destroyCommand(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := destroyCommand(tt.args.config); !reflect.DeepEqual(got, tt.want) {
+			if got := tfDestroy(tt.args.config); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("destroyCommand() = %v, want %v", got, tt.want)
 			}
 		})
@@ -70,37 +70,8 @@ func Test_applyCommand(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := applyCommand(tt.args.config); !reflect.DeepEqual(got, tt.want) {
+			if got := tfApply(tt.args.config); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("applyCommand() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_terraformCommand(t *testing.T) {
-	type args struct {
-		config Config
-	}
-	tests := []struct {
-		name string
-		args args
-		want *exec.Cmd
-	}{
-		{
-			"default",
-			args{config: Config{}},
-			exec.Command("terraform", "apply", "plan.tfout"),
-		},
-		{
-			"destroy",
-			args{config: Config{Destroy: true}},
-			exec.Command("terraform", "destroy", "-force"),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := terraformCommand(tt.args.config); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("terraformCommand() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -113,22 +84,25 @@ func Test_planCommand(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
+		destroy bool
 		want *exec.Cmd
 	}{
 		{
 			"default",
 			args{config: Config{}},
+			false,
 			exec.Command("terraform", "plan", "-out=plan.tfout"),
 		},
 		{
 			"destroy",
-			args{config: Config{Destroy: true}},
+			args{config: Config{}},
+			true,
 			exec.Command("terraform", "plan", "-destroy"),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := planCommand(tt.args.config); !reflect.DeepEqual(got, tt.want) {
+			if got := tfPlan(tt.args.config, tt.destroy); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("planCommand() = %v, want %v", got, tt.want)
 			}
 		})
