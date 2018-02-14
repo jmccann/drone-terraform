@@ -3,111 +3,10 @@ package main
 import (
 	"os"
 	"os/exec"
-	"reflect"
 	"testing"
 
 	. "github.com/franela/goblin"
 )
-
-func Test_destroyCommand(t *testing.T) {
-	type args struct {
-		config Config
-	}
-	tests := []struct {
-		name string
-		args args
-		want *exec.Cmd
-	}{
-		{
-			"default",
-			args{config: Config{}},
-			exec.Command("terraform", "destroy", "-force"),
-		},
-		{
-			"with targets",
-			args{config: Config{Targets: []string{"target1", "target2"}}},
-			exec.Command("terraform", "destroy", "-target=target1", "-target=target2", "-force"),
-		},
-		{
-			"with parallelism",
-			args{config: Config{Parallelism: 5}},
-			exec.Command("terraform", "destroy", "-parallelism=5", "-force"),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tfDestroy(tt.args.config); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("destroyCommand() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_applyCommand(t *testing.T) {
-	type args struct {
-		config Config
-	}
-	tests := []struct {
-		name string
-		args args
-		want *exec.Cmd
-	}{
-		{
-			"default",
-			args{config: Config{}},
-			exec.Command("terraform", "apply", "plan.tfout"),
-		},
-		{
-			"with targets",
-			args{config: Config{Targets: []string{"target1", "target2"}}},
-			exec.Command("terraform", "apply", "--target", "target1", "--target", "target2", "plan.tfout"),
-		},
-		{
-			"with parallelism",
-			args{config: Config{Parallelism: 5}},
-			exec.Command("terraform", "apply", "-parallelism=5", "plan.tfout"),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tfApply(tt.args.config); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("applyCommand() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_planCommand(t *testing.T) {
-	type args struct {
-		config Config
-	}
-	tests := []struct {
-		name string
-		args args
-		destroy bool
-		want *exec.Cmd
-	}{
-		{
-			"default",
-			args{config: Config{}},
-			false,
-			exec.Command("terraform", "plan", "-out=plan.tfout"),
-		},
-		{
-			"destroy",
-			args{config: Config{}},
-			true,
-			exec.Command("terraform", "plan", "-destroy"),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tfPlan(tt.args.config, tt.destroy); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("planCommand() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
 
 func TestPlugin(t *testing.T) {
 	g := Goblin(t)
@@ -125,6 +24,106 @@ func TestPlugin(t *testing.T) {
 			g.Assert(os.Getenv("TF_VAR_something")).Equal("some value")
 			g.Assert(os.Getenv("TF_VAR_something_else")).Equal("some other value")
 			g.Assert(os.Getenv("TF_VAR_base64")).Equal("dGVzdA==")
+		})
+	})
+
+	g.Describe("tfApply", func() {
+		g.It("Should return correct apply commands given the arguments", func() {
+			type args struct {
+				config Config
+			}
+
+			tests := []struct {
+				name string
+				args args
+				want *exec.Cmd
+			}{
+				{
+					"default",
+					args{config: Config{}},
+					exec.Command("terraform", "apply", "plan.tfout"),
+				},
+				{
+					"with targets",
+					args{config: Config{Targets: []string{"target1", "target2"}}},
+					exec.Command("terraform", "apply", "--target", "target1", "--target", "target2", "plan.tfout"),
+				},
+				{
+					"with parallelism",
+					args{config: Config{Parallelism: 5}},
+					exec.Command("terraform", "apply", "-parallelism=5", "plan.tfout"),
+				},
+			}
+
+			for _, tt := range tests {
+				g.Assert(tfApply(tt.args.config)).Equal(tt.want)
+			}
+		})
+	})
+
+	g.Describe("tfDestroy", func() {
+		g.It("Should return correct destroy commands given the arguments", func() {
+			type args struct {
+				config Config
+			}
+
+			tests := []struct {
+				name string
+				args args
+				want *exec.Cmd
+			}{
+				{
+					"default",
+					args{config: Config{}},
+					exec.Command("terraform", "destroy", "-force"),
+				},
+				{
+					"with targets",
+					args{config: Config{Targets: []string{"target1", "target2"}}},
+					exec.Command("terraform", "destroy", "-target=target1", "-target=target2", "-force"),
+				},
+				{
+					"with parallelism",
+					args{config: Config{Parallelism: 5}},
+					exec.Command("terraform", "destroy", "-parallelism=5", "-force"),
+				},
+			}
+
+			for _, tt := range tests {
+				g.Assert(tfDestroy(tt.args.config)).Equal(tt.want)
+			}
+		})
+	})
+
+	g.Describe("tfPlan", func() {
+		g.It("Should return correct plan commands given the arguments", func() {
+			type args struct {
+				config Config
+			}
+
+			tests := []struct {
+				name string
+				args args
+				destroy bool
+				want *exec.Cmd
+			}{
+				{
+					"default",
+					args{config: Config{}},
+					false,
+					exec.Command("terraform", "plan", "-out=plan.tfout"),
+				},
+				{
+					"destroy",
+					args{config: Config{}},
+					true,
+					exec.Command("terraform", "plan", "-destroy"),
+				},
+			}
+
+			for _, tt := range tests {
+				g.Assert(tfPlan(tt.args.config, tt.destroy)).Equal(tt.want)
+			}
 		})
 	})
 }
