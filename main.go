@@ -27,7 +27,7 @@ func main() {
 			Name:   "actions",
 			Usage:  "a list of actions to have terraform perform",
 			EnvVar: "PLUGIN_ACTIONS",
-			Value:  &cli.StringSlice{"validate", "apply"},
+			Value:  &cli.StringSlice{"validate", "plan", "apply"},
 		},
 		cli.StringFlag{
 			Name:   "ca_cert",
