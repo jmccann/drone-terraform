@@ -122,7 +122,7 @@ func run(c *cli.Context) error {
 
 	plugin := Plugin{
 		Config: Config{
-			Actions:    c.StringSlice("actions"),
+			Actions:     c.StringSlice("actions"),
 			Vars:        vars,
 			Secrets:     secrets,
 			InitOptions: initOptions,
