@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"os/user"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -33,6 +35,12 @@ type (
 		Destroy     bool
 	}
 
+	Netrc struct {
+		Machine  string
+		Login    string
+		Password string
+	}
+
 	// InitOptions include options for the Terraform's init command
 	InitOptions struct {
 		BackendConfig []string `json:"backend-config"`
@@ -43,6 +51,7 @@ type (
 	// Plugin represents the plugin instance to be executed
 	Plugin struct {
 		Config    Config
+		Netrc     Netrc
 		Terraform Terraform
 	}
 )
@@ -60,6 +69,12 @@ func (p Plugin) Exec() error {
 
 	if p.Config.RoleARN != "" {
 		assumeRole(p.Config.RoleARN)
+	}
+
+	// writing the .netrc file with Github credentials in it.
+	err := writeNetrc(p.Netrc.Machine, p.Netrc.Login, p.Netrc.Password)
+	if err != nil {
+		return err
 	}
 
 	var commands []*exec.Cmd
@@ -303,3 +318,32 @@ func assumeRole(roleArn string) {
 func trace(cmd *exec.Cmd) {
 	fmt.Println("$", strings.Join(cmd.Args, " "))
 }
+
+// helper function to write a netrc file.
+// The following code comes from the official Git plugin for Drone:
+// https://github.com/drone-plugins/drone-git/blob/8386effd2fe8c8695cf979427f8e1762bd805192/utils.go#L43-L68
+func writeNetrc(machine, login, password string) error {
+	if machine == "" {
+		return nil
+	}
+	out := fmt.Sprintf(
+		netrcFile,
+		machine,
+		login,
+		password,
+	)
+
+	home := "/root"
+	u, err := user.Current()
+	if err == nil {
+		home = u.HomeDir
+	}
+	path := filepath.Join(home, ".netrc")
+	return ioutil.WriteFile(path, []byte(out), 0600)
+}
+
+const netrcFile = `
+machine %s
+login %s
+password %s
+`
