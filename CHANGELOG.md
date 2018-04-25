@@ -1,3 +1,7 @@
+## 4.1-0.11.7 (2018-04-25)
+* Add .netrc support
+* Update embedded TF to `0.11.7`
+
 ## 4.0-0.11.3 (2018-02-07)
 * Update embedded TF to `0.11.3`
 
