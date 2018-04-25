@@ -1,3 +1,10 @@
+## 5.0-0.11.7 (2018-04-25)
+**BREAKING CHANGE**
+* Removed `destroy` param
+* Removed `plan` param
+* Added `actions` param to provide a list of actions to perform.
+See [DOCS.md](DOCS.md) for more info and examples.
+
 ## 4.1-0.11.7 (2018-04-25)
 * Add .netrc support
 * Update embedded TF to `0.11.7`
