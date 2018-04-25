@@ -15,6 +15,6 @@ pipeline:
     image: plugins/docker
     secrets: [ docker_username, docker_password ]
     repo: jonathanio/drone-terraform
-    #    auto_tag: true
-    tags:
-      - latest
+    auto_tag: true
+    when:
+      branch: master
