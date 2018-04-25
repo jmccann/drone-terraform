@@ -2,6 +2,7 @@ workspace:
   base: /go
 
 pipeline:
+
   test:
     image: golang:1.9
     environment:
@@ -9,3 +10,9 @@ pipeline:
     commands:
       - go test -cover -coverprofile=coverage.out
       - go build -ldflags "-s -w -X main.revision=$(git rev-parse HEAD)" -a
+
+  build-container:
+    image: plugins/docker
+    secrets: [ docker_username, docker_password ]
+    repo: jonathanio/drone-terraform
+    auto_tag: true
