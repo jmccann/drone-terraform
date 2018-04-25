@@ -1,15 +1,16 @@
 # drone-terraform
 
-[![Build Status](http://beta.drone.io/api/badges/jmccann/drone-terraform/status.svg)](http://beta.drone.io/jmccann/drone-terraform)
+[![Build Status](https://drone.nwk.io/api/badges/jonathanio/drone-terraform/status.svg)](https://drone.nwk.io/jonathanio/drone-terraform)
 
-Drone plugin to execute Terraform plan and apply. For the usage information and
-a listing of the available options please take a look at [the docs](https://github.com/jmccann/drone-terraform/blob/master/DOCS.md).
+Drone plugin to execute Terraform. For the usage information and a listing of
+the available options please take a look at [the
+docs](https://github.com/jonathanio/drone-terraform/blob/master/DOCS.md).
 
 ## Build
 
 Build the binary with the following commands:
 
-```
+```bash
 go build
 go test
 ```
@@ -18,15 +19,15 @@ go test
 
 Build the docker image with the following commands:
 
-```
+```bash
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo
-docker build --rm=true -t jmccann/drone-terraform .
+docker build --rm=true -t jonathanio/drone-terraform .
 ```
 
 Please note incorrectly building the image for the correct x64 linux and with
 GCO disabled will result in an error when running the Docker image:
 
-```
+```text
 docker: Error response from daemon: Container command
 '/bin/drone-terraform' not found or does not exist.
 ```
@@ -35,13 +36,15 @@ docker: Error response from daemon: Container command
 
 Execute from the working directory:
 
-```
+```bash
 docker run --rm \
   -v $(pwd):$(pwd) \
   -w $(pwd) \
-  jmccann/drone-terraform:latest --plan
+  jonathanio/drone-terraform:latest --plan
 ```
 
-## Drone 0.4
+## Legacy and Upstream
 
-Legacy `drone-terraform` plugin exists @ `jmccann/drone-terraform:0.4`
+Access to older versions and upstream versions of `drone-terraform` is
+available from the master repository at
+[jmccann/drone-terraform](https://github.com/jmccann/drone-terraform).
