@@ -21,7 +21,7 @@ import (
 type (
 	// Config holds input parameters for the plugin
 	Config struct {
-		Plan        bool
+		Actions     []string
 		Vars        map[string]string
 		Secrets     map[string]string
 		InitOptions InitOptions
@@ -32,7 +32,6 @@ type (
 		Parallelism int
 		Targets     []string
 		VarFiles    []string
-		Destroy     bool
 	}
 
 	Netrc struct {
@@ -88,15 +87,27 @@ func (p Plugin) Exec() error {
 	}
 
 	commands = append(commands, deleteCache())
-
 	commands = append(commands, initCommand(p.Config.InitOptions))
-
 	commands = append(commands, getModules())
-	commands = append(commands, validateCommand(p.Config))
-	commands = append(commands, planCommand(p.Config))
-	if !p.Config.Plan {
-		commands = append(commands, terraformCommand(p.Config))
+
+	// Add commands listed from Actions
+	for _, action := range p.Config.Actions {
+		switch action {
+		case "validate":
+			commands = append(commands, tfValidate(p.Config))
+		case "plan":
+			commands = append(commands, tfPlan(p.Config, false))
+		case "plan-destroy":
+			commands = append(commands, tfPlan(p.Config, true))
+		case "apply":
+			commands = append(commands, tfApply(p.Config))
+		case "destroy":
+			commands = append(commands, tfDestroy(p.Config))
+		default:
+			return fmt.Errorf("valid actions are: validate, plan, apply, plan-destroy, destroy.  You provided %s", action)
+		}
 	}
+
 	commands = append(commands, deleteCache())
 
 	for _, c := range commands {
@@ -127,13 +138,7 @@ func (p Plugin) Exec() error {
 	return nil
 }
 
-func installCaCert(cacert string) *exec.Cmd {
-	ioutil.WriteFile("/usr/local/share/ca-certificates/ca_cert.crt", []byte(cacert), 0644)
-	return exec.Command(
-		"update-ca-certificates",
-	)
-}
-
+// CopyTfEnv creates copies of TF_VAR_ to lowercase
 func CopyTfEnv() {
 	tfVar := regexp.MustCompile(`^TF_VAR_.*$`)
 	for _, e := range os.Environ() {
@@ -145,11 +150,39 @@ func CopyTfEnv() {
 	}
 }
 
+func assumeRole(roleArn string) {
+	client := sts.New(session.New())
+	duration := time.Hour * 1
+	stsProvider := &stscreds.AssumeRoleProvider{
+		Client:          client,
+		Duration:        duration,
+		RoleARN:         roleArn,
+		RoleSessionName: "drone",
+	}
+
+	value, err := credentials.NewCredentials(stsProvider).Get()
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Fatal("Error assuming role!")
+	}
+	os.Setenv("AWS_ACCESS_KEY_ID", value.AccessKeyID)
+	os.Setenv("AWS_SECRET_ACCESS_KEY", value.SecretAccessKey)
+	os.Setenv("AWS_SESSION_TOKEN", value.SessionToken)
+}
+
 func deleteCache() *exec.Cmd {
 	return exec.Command(
 		"rm",
 		"-rf",
 		".terraform",
+	)
+}
+
+func getModules() *exec.Cmd {
+	return exec.Command(
+		"terraform",
+		"get",
 	)
 }
 
@@ -181,35 +214,69 @@ func initCommand(config InitOptions) *exec.Cmd {
 	)
 }
 
-func getModules() *exec.Cmd {
+func installCaCert(cacert string) *exec.Cmd {
+	ioutil.WriteFile("/usr/local/share/ca-certificates/ca_cert.crt", []byte(cacert), 0644)
 	return exec.Command(
-		"terraform",
-		"get",
+		"update-ca-certificates",
 	)
 }
 
-func validateCommand(config Config) *exec.Cmd {
+func trace(cmd *exec.Cmd) {
+	fmt.Println("$", strings.Join(cmd.Args, " "))
+}
+
+func tfApply(config Config) *exec.Cmd {
 	args := []string{
-		"validate",
+		"apply",
 	}
-	for _, v := range config.VarFiles {
-		args = append(args, "-var-file", fmt.Sprintf("%s", v))
+	for _, v := range config.Targets {
+		args = append(args, "--target", fmt.Sprintf("%s", v))
 	}
-	for k, v := range config.Vars {
-		args = append(args, "-var")
-		args = append(args, fmt.Sprintf("%s=%s", k, v))
+	if config.Parallelism > 0 {
+		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
 	}
+	if config.InitOptions.Lock != nil {
+		args = append(args, fmt.Sprintf("-lock=%t", *config.InitOptions.Lock))
+	}
+	if config.InitOptions.LockTimeout != "" {
+		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
+	}
+	args = append(args, "plan.tfout")
 	return exec.Command(
 		"terraform",
 		args...,
 	)
 }
 
-func planCommand(config Config) *exec.Cmd {
+func tfDestroy(config Config) *exec.Cmd {
+	args := []string{
+		"destroy",
+	}
+	for _, v := range config.Targets {
+		args = append(args, fmt.Sprintf("-target=%s", v))
+	}
+	if config.Parallelism > 0 {
+		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
+	}
+	if config.InitOptions.Lock != nil {
+		args = append(args, fmt.Sprintf("-lock=%t", *config.InitOptions.Lock))
+	}
+	if config.InitOptions.LockTimeout != "" {
+		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
+	}
+	args = append(args, "-force")
+	return exec.Command(
+		"terraform",
+		args...,
+	)
+}
+
+func tfPlan(config Config, destroy bool) *exec.Cmd {
 	args := []string{
 		"plan",
 	}
-	if config.Destroy {
+
+	if destroy {
 		args = append(args, "-destroy")
 	} else {
 		args = append(args, "-out=plan.tfout")
@@ -240,83 +307,21 @@ func planCommand(config Config) *exec.Cmd {
 	)
 }
 
-func terraformCommand(config Config) *exec.Cmd {
-	if config.Destroy {
-		return destroyCommand(config)
-	}
-
-	return applyCommand(config)
-}
-
-func applyCommand(config Config) *exec.Cmd {
+func tfValidate(config Config) *exec.Cmd {
 	args := []string{
-		"apply",
+		"validate",
 	}
-	for _, v := range config.Targets {
-		args = append(args, "--target", fmt.Sprintf("%s", v))
+	for _, v := range config.VarFiles {
+		args = append(args, "-var-file", fmt.Sprintf("%s", v))
 	}
-	if config.Parallelism > 0 {
-		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
+	for k, v := range config.Vars {
+		args = append(args, "-var")
+		args = append(args, fmt.Sprintf("%s=%s", k, v))
 	}
-	if config.InitOptions.Lock != nil {
-		args = append(args, fmt.Sprintf("-lock=%t", *config.InitOptions.Lock))
-	}
-	if config.InitOptions.LockTimeout != "" {
-		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
-	}
-	args = append(args, "plan.tfout")
 	return exec.Command(
 		"terraform",
 		args...,
 	)
-}
-
-func destroyCommand(config Config) *exec.Cmd {
-	args := []string{
-		"destroy",
-	}
-	for _, v := range config.Targets {
-		args = append(args, fmt.Sprintf("-target=%s", v))
-	}
-	if config.Parallelism > 0 {
-		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
-	}
-	if config.InitOptions.Lock != nil {
-		args = append(args, fmt.Sprintf("-lock=%t", *config.InitOptions.Lock))
-	}
-	if config.InitOptions.LockTimeout != "" {
-		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
-	}
-	args = append(args, "-force")
-	return exec.Command(
-		"terraform",
-		args...,
-	)
-}
-
-func assumeRole(roleArn string) {
-	client := sts.New(session.New())
-	duration := time.Hour * 1
-	stsProvider := &stscreds.AssumeRoleProvider{
-		Client:          client,
-		Duration:        duration,
-		RoleARN:         roleArn,
-		RoleSessionName: "drone",
-	}
-
-	value, err := credentials.NewCredentials(stsProvider).Get()
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"error": err,
-		}).Fatal("Error assuming role!")
-	}
-	os.Setenv("AWS_ACCESS_KEY_ID", value.AccessKeyID)
-	os.Setenv("AWS_SECRET_ACCESS_KEY", value.SecretAccessKey)
-	os.Setenv("AWS_SESSION_TOKEN", value.SessionToken)
-}
-
-func trace(cmd *exec.Cmd) {
-	fmt.Println("$", strings.Join(cmd.Args, " "))
 }
 
 // helper function to write a netrc file.
