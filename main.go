@@ -54,6 +54,21 @@ func main() {
 			EnvVar: "PLUGIN_SENSITIVE",
 		},
 		cli.StringFlag{
+			Name:   "netrc.machine",
+			Usage:  "netrc machine",
+			EnvVar: "DRONE_NETRC_MACHINE",
+		},
+		cli.StringFlag{
+			Name:   "netrc.username",
+			Usage:  "netrc username",
+			EnvVar: "DRONE_NETRC_USERNAME",
+		},
+		cli.StringFlag{
+			Name:   "netrc.password",
+			Usage:  "netrc password",
+			EnvVar: "DRONE_NETRC_PASSWORD",
+		},
+		cli.StringFlag{
 			Name:   "role_arn_to_assume",
 			Usage:  "A role to assume before running the terraform commands",
 			EnvVar: "PLUGIN_ROLE_ARN_TO_ASSUME",
@@ -141,6 +156,11 @@ func run(c *cli.Context) error {
 			Targets:     c.StringSlice("targets"),
 			VarFiles:    c.StringSlice("var_files"),
 			Destroy:     c.Bool("destroy"),
+		},
+		Netrc: Netrc{
+			Login:    c.String("netrc.username"),
+			Machine:  c.String("netrc.machine"),
+			Password: c.String("netrc.password"),
 		},
 		Terraform: Terraform{
 			Version: c.String("tf.version"),
