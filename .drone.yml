@@ -1,6 +1,5 @@
 workspace:
   base: /go
-  path: src/github.com/drone-plugins/drone-terraform
 
 pipeline:
   test:
