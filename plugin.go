@@ -211,9 +211,9 @@ func initCommand(config Config) *exec.Cmd {
 
 	var command string
 	if config.TfInAutomation {
-		command = fmt.Sprintf("TF_IN_AUTOMATION=true terraform")
+		command = "TF_IN_AUTOMATION=true terraform"
 	} else {
-		command = fmt.Sprintf("terraform")
+		command = "terraform"
 	}
 
 	return exec.Command(
@@ -252,9 +252,9 @@ func tfApply(config Config) *exec.Cmd {
 	args = append(args, "plan.tfout")
 	var command string
 	if config.TfInAutomation {
-		command = fmt.Sprintf("TF_IN_AUTOMATION=true terraform")
+		command = "TF_IN_AUTOMATION=true terraform"
 	} else {
-		command = fmt.Sprintf("terraform")
+		command = "terraform"
 	}
 	return exec.Command(
 		command,
@@ -281,9 +281,9 @@ func tfDestroy(config Config) *exec.Cmd {
 	args = append(args, "-force")
 	var command string
 	if config.TfInAutomation {
-		command = fmt.Sprintf("TF_IN_AUTOMATION=true terraform")
+		command = "TF_IN_AUTOMATION=true terraform"
 	} else {
-		command = fmt.Sprintf("terraform")
+		command = "terraform"
 	}
 	return exec.Command(
 		command,
@@ -323,9 +323,9 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 	}
 	var command string
 	if config.TfInAutomation {
-		command = fmt.Sprintf("TF_IN_AUTOMATION=true terraform")
+		command = "TF_IN_AUTOMATION=true terraform"
 	} else {
-		command = fmt.Sprintf("terraform")
+		command = "terraform"
 	}
 	return exec.Command(
 		command,
@@ -346,9 +346,9 @@ func tfValidate(config Config) *exec.Cmd {
 	}
 	var command string
 	if config.TfInAutomation {
-		command = fmt.Sprintf("TF_IN_AUTOMATION=true terraform")
+		command = "TF_IN_AUTOMATION=true terraform"
 	} else {
-		command = fmt.Sprintf("terraform")
+		command = "terraform"
 	}
 	return exec.Command(
 		command,
