@@ -88,7 +88,6 @@ func (p Plugin) Exec() error {
 	}
 
 	commands = append(commands, deleteCache())
-	//commands = append(commands, initCommand(p.Config.InitOptions))
 	commands = append(commands, initCommand(p.Config))
 	commands = append(commands, getModules())
 
