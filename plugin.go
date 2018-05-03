@@ -21,17 +21,18 @@ import (
 type (
 	// Config holds input parameters for the plugin
 	Config struct {
-		Actions     []string
-		Vars        map[string]string
-		Secrets     map[string]string
-		InitOptions InitOptions
-		Cacert      string
-		Sensitive   bool
-		RoleARN     string
-		RootDir     string
-		Parallelism int
-		Targets     []string
-		VarFiles    []string
+		Actions        []string
+		Vars           map[string]string
+		Secrets        map[string]string
+		InitOptions    InitOptions
+		Cacert         string
+		Sensitive      bool
+		TfInAutomation bool
+		RoleARN        string
+		RootDir        string
+		Parallelism    int
+		Targets        []string
+		VarFiles       []string
 	}
 
 	Netrc struct {
@@ -87,7 +88,8 @@ func (p Plugin) Exec() error {
 	}
 
 	commands = append(commands, deleteCache())
-	commands = append(commands, initCommand(p.Config.InitOptions))
+	//commands = append(commands, initCommand(p.Config.InitOptions))
+	commands = append(commands, initCommand(p.Config))
 	commands = append(commands, getModules())
 
 	// Add commands listed from Actions
@@ -186,30 +188,37 @@ func getModules() *exec.Cmd {
 	)
 }
 
-func initCommand(config InitOptions) *exec.Cmd {
+func initCommand(config Config) *exec.Cmd {
 	args := []string{
 		"init",
 	}
 
-	for _, v := range config.BackendConfig {
+	for _, v := range config.InitOptions.BackendConfig {
 		args = append(args, fmt.Sprintf("-backend-config=%s", v))
 	}
 
 	// True is default in TF
-	if config.Lock != nil {
-		args = append(args, fmt.Sprintf("-lock=%t", *config.Lock))
+	if config.InitOptions.Lock != nil {
+		args = append(args, fmt.Sprintf("-lock=%t", *config.InitOptions.Lock))
 	}
 
 	// "0s" is default in TF
-	if config.LockTimeout != "" {
-		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.LockTimeout))
+	if config.InitOptions.LockTimeout != "" {
+		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
 
 	// Fail Terraform execution on prompt
 	args = append(args, "-input=false")
 
+	var command string
+	if config.TfInAutomation {
+		command = fmt.Sprintf("TF_IN_AUTOMATION=true terraform")
+	} else {
+		command = fmt.Sprintf("terraform")
+	}
+
 	return exec.Command(
-		"terraform",
+		command,
 		args...,
 	)
 }
@@ -242,8 +251,14 @@ func tfApply(config Config) *exec.Cmd {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
 	args = append(args, "plan.tfout")
+	var command string
+	if config.TfInAutomation {
+		command = fmt.Sprintf("TF_IN_AUTOMATION=true terraform")
+	} else {
+		command = fmt.Sprintf("terraform")
+	}
 	return exec.Command(
-		"terraform",
+		command,
 		args...,
 	)
 }
@@ -265,8 +280,14 @@ func tfDestroy(config Config) *exec.Cmd {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
 	args = append(args, "-force")
+	var command string
+	if config.TfInAutomation {
+		command = fmt.Sprintf("TF_IN_AUTOMATION=true terraform")
+	} else {
+		command = fmt.Sprintf("terraform")
+	}
 	return exec.Command(
-		"terraform",
+		command,
 		args...,
 	)
 }
@@ -301,8 +322,14 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 	if config.InitOptions.LockTimeout != "" {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
+	var command string
+	if config.TfInAutomation {
+		command = fmt.Sprintf("TF_IN_AUTOMATION=true terraform")
+	} else {
+		command = fmt.Sprintf("terraform")
+	}
 	return exec.Command(
-		"terraform",
+		command,
 		args...,
 	)
 }
@@ -318,8 +345,14 @@ func tfValidate(config Config) *exec.Cmd {
 		args = append(args, "-var")
 		args = append(args, fmt.Sprintf("%s=%s", k, v))
 	}
+	var command string
+	if config.TfInAutomation {
+		command = fmt.Sprintf("TF_IN_AUTOMATION=true terraform")
+	} else {
+		command = fmt.Sprintf("terraform")
+	}
 	return exec.Command(
-		"terraform",
+		command,
 		args...,
 	)
 }
