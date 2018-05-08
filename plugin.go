@@ -89,7 +89,7 @@ func (p Plugin) Exec() error {
 	}
 
 	commands = append(commands, deleteCache())
-	commands = append(commands, initCommand(p.Config.InitOptions))
+	commands = append(commands, initCommand(p.Config))
 	commands = append(commands, getModules())
 
 	// Add commands listed from Actions
@@ -188,28 +188,28 @@ func getModules() *exec.Cmd {
 	)
 }
 
-func initCommand(config InitOptions) *exec.Cmd {
+func initCommand(config Config) *exec.Cmd {
 	args := []string{
 		"init",
 	}
 
-	for _, v := range config.BackendConfig {
+	for _, v := range config.InitOptions.BackendConfig {
 		args = append(args, fmt.Sprintf("-backend-config=%s", v))
 	}
 
 	// True is default in TF
-	if config.Lock != nil {
-		args = append(args, fmt.Sprintf("-lock=%t", *config.Lock))
+	if config.InitOptions.Lock != nil {
+		args = append(args, fmt.Sprintf("-lock=%t", *config.InitOptions.Lock))
 	}
 
 	// "0s" is default in TF
-	if config.LockTimeout != "" {
-		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.LockTimeout))
+	if config.InitOptions.LockTimeout != "" {
+		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
 
 	if config.PluginDir == true {
-		if config.PluginPath != "" {
-			args = append(args, fmt.Sprintf("-plugin-dir=%s", config.PluginPath))
+		if config.InitOptions.PluginPath != "" {
+			args = append(args, fmt.Sprintf("-plugin-dir=%s", config.InitOptions.PluginPath))
 		}
 	}
 

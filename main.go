@@ -82,7 +82,7 @@ func main() {
 			Name: "plugin_dir",
 			Usage: "whether or not to set custom plugin directory path",
 			EnvVar: "PLUGIN_DIR",
-		}
+		},
 		cli.BoolFlag{
 			Name:   "sensitive",
 			Usage:  "whether or not to suppress terraform commands to stdout",
