@@ -32,6 +32,7 @@ type (
 		Parallelism int
 		Targets     []string
 		VarFiles    []string
+		PluginDir	bool
 	}
 
 	Netrc struct {
@@ -45,7 +46,7 @@ type (
 		BackendConfig []string `json:"backend-config"`
 		Lock          *bool    `json:"lock"`
 		LockTimeout   string   `json:"lock-timeout"`
-		PluginDir	  string   `json:"plugin-dir`
+		PluginPath	  string   `json:"plugin-path`
 	}
 
 	// Plugin represents the plugin instance to be executed
@@ -206,9 +207,10 @@ func initCommand(config InitOptions) *exec.Cmd {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.LockTimeout))
 	}
 
-	// "" is default in TF
-	if config.PluginDir != "" {
-		args = append(args, fmt.Sprintf("-plugin-dir=%s", config.PluginDir))
+	if config.PluginDir == true {
+		if config.PluginPath != "" {
+			args = append(args, fmt.Sprintf("-plugin-dir=%s", config.PluginPath))
+		}
 	}
 
 	// Fail Terraform execution on prompt
