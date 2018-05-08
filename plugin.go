@@ -45,6 +45,7 @@ type (
 		BackendConfig []string `json:"backend-config"`
 		Lock          *bool    `json:"lock"`
 		LockTimeout   string   `json:"lock-timeout"`
+		PluginDir	  string   `json:"plugin-dir`
 	}
 
 	// Plugin represents the plugin instance to be executed
@@ -203,6 +204,11 @@ func initCommand(config InitOptions) *exec.Cmd {
 	// "0s" is default in TF
 	if config.LockTimeout != "" {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.LockTimeout))
+	}
+
+	// "" is default in TF
+	if config.PluginDir != "" {
+		args = append(args, fmt.Sprintf("-plugin-dir=%s", config.PluginDir))
 	}
 
 	// Fail Terraform execution on prompt

@@ -202,6 +202,9 @@ init_options.lock
 init_options.lock-timeout
 : Duration to wait for a state lock. Default `0s`.
 
+init_options.plugin-dir
+: Local path to use terraform plugins from. Default is `""` which will pull from upstream Terraform.
+
 vars
 : a map of variables to pass to the Terraform `plan` and `apply` commands.
 Each value is passed as a `-var <key>=<value>` option.
