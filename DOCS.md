@@ -216,10 +216,11 @@ Each value is passed as a `-var-file <value>` option.
 ca_cert
 : ca cert to add to your environment to allow terraform to use internal/private resources
 
-plugin_dir
-
 sensitive
 : (default: `false`) - Whether or not to suppress terraform commands to stdout.
+
+plugin_dir
+: (default: `false`) - Wheter or not to set custom plugin directory path.
 
 role_arn_to_assume
 : A role to assume before running the terraform commands.
