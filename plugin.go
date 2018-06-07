@@ -312,7 +312,7 @@ func tfValidate(config Config) *exec.Cmd {
 		"validate",
 	}
 	for _, v := range config.VarFiles {
-		args = append(args, "-var-file=%s", fmt.Sprintf("%s", v))
+		args = append(args, fmt.Sprintf("-var-file=%s", v))
 	}
 	for k, v := range config.Vars {
 		args = append(args, "-var")
