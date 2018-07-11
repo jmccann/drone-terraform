@@ -286,7 +286,7 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 		args = append(args, "--target", fmt.Sprintf("%s", v))
 	}
 	for _, v := range config.VarFiles {
-		args = append(args, "-var-file", fmt.Sprintf("%s", v))
+		args = append(args, fmt.Sprintf("-var-file=%s", v))
 	}
 	for k, v := range config.Vars {
 		args = append(args, "-var")
@@ -312,7 +312,7 @@ func tfValidate(config Config) *exec.Cmd {
 		"validate",
 	}
 	for _, v := range config.VarFiles {
-		args = append(args, "-var-file", fmt.Sprintf("%s", v))
+		args = append(args, fmt.Sprintf("-var-file=%s", v))
 	}
 	for k, v := range config.Vars {
 		args = append(args, "-var")
