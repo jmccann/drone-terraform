@@ -202,6 +202,9 @@ init_options.lock
 init_options.lock-timeout
 : Duration to wait for a state lock. Default `0s`.
 
+init_options.plugin-path
+: Local path to use terraform plugins from. Default is `""` which will pull from upstream Terraform.
+
 vars
 : a map of variables to pass to the Terraform `plan` and `apply` commands.
 Each value is passed as a `-var <key>=<value>` option.
@@ -215,6 +218,9 @@ ca_cert
 
 sensitive
 : (default: `false`) - Whether or not to suppress terraform commands to stdout.
+
+plugin_dir
+: (default: `false`) - Wheter or not to set custom plugin directory path.
 
 role_arn_to_assume
 : A role to assume before running the terraform commands.

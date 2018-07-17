@@ -78,6 +78,11 @@ func main() {
 			Usage:  "a map of secrets to pass to the Terraform `plan` and `apply` commands. Each value is passed as a `<key>=<ENV>` option",
 			EnvVar: "PLUGIN_SECRETS",
 		},
+		cli.StringFlag{
+			Name: "plugin_dir",
+			Usage: "whether or not to set custom plugin directory path",
+			EnvVar: "PLUGIN_DIR",
+		},
 		cli.BoolFlag{
 			Name:   "sensitive",
 			Usage:  "whether or not to suppress terraform commands to stdout",
@@ -148,6 +153,7 @@ func run(c *cli.Context) error {
 			Parallelism: c.Int("parallelism"),
 			Targets:     c.StringSlice("targets"),
 			VarFiles:    c.StringSlice("var_files"),
+			PluginDir:   c.Bool("plugin_dir"),
 		},
 		Netrc: Netrc{
 			Login:    c.String("netrc.username"),
