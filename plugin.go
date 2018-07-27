@@ -255,6 +255,13 @@ func tfDestroy(config Config) *exec.Cmd {
 	for _, v := range config.Targets {
 		args = append(args, fmt.Sprintf("-target=%s", v))
 	}
+	for _, v := range config.VarFiles {
+		args = append(args, "-var-file", fmt.Sprintf("%s", v))
+	}
+	for k, v := range config.Vars {
+		args = append(args, "-var")
+		args = append(args, fmt.Sprintf("%s=%s", k, v))
+	}
 	if config.Parallelism > 0 {
 		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
 	}
