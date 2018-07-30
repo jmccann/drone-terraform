@@ -256,11 +256,10 @@ func tfDestroy(config Config) *exec.Cmd {
 		args = append(args, fmt.Sprintf("-target=%s", v))
 	}
 	for _, v := range config.VarFiles {
-		args = append(args, "-var-file", fmt.Sprintf("%s", v))
+		args = append(args, fmt.Sprintf("-var-file=%s", v))
 	}
 	for k, v := range config.Vars {
-		args = append(args, "-var")
-		args = append(args, fmt.Sprintf("%s=%s", k, v))
+		args = append(args, "-var", fmt.Sprintf("%s=%s", k, v))
 	}
 	if config.Parallelism > 0 {
 		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
@@ -293,11 +292,10 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 		args = append(args, "--target", fmt.Sprintf("%s", v))
 	}
 	for _, v := range config.VarFiles {
-		args = append(args, "-var-file", fmt.Sprintf("%s", v))
+		args = append(args, fmt.Sprintf("-var-file=%s", v))
 	}
 	for k, v := range config.Vars {
-		args = append(args, "-var")
-		args = append(args, fmt.Sprintf("%s=%s", k, v))
+		args = append(args, "-var", fmt.Sprintf("%s=%s", k, v))
 	}
 	if config.Parallelism > 0 {
 		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
@@ -319,11 +317,10 @@ func tfValidate(config Config) *exec.Cmd {
 		"validate",
 	}
 	for _, v := range config.VarFiles {
-		args = append(args, "-var-file", fmt.Sprintf("%s", v))
+		args = append(args, fmt.Sprintf("-var-file=%s", v))
 	}
 	for k, v := range config.Vars {
-		args = append(args, "-var")
-		args = append(args, fmt.Sprintf("%s=%s", k, v))
+		args = append(args, "-var", fmt.Sprintf("%s=%s", k, v))
 	}
 	return exec.Command(
 		"terraform",
