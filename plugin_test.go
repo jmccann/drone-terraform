@@ -102,10 +102,10 @@ func TestPlugin(t *testing.T) {
 			}
 
 			tests := []struct {
-				name string
-				args args
+				name    string
+				args    args
 				destroy bool
-				want *exec.Cmd
+				want    *exec.Cmd
 			}{
 				{
 					"default",
