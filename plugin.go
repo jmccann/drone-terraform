@@ -256,12 +256,8 @@ func tfDestroy(config Config) *exec.Cmd {
 	for _, v := range config.Targets {
 		args = append(args, fmt.Sprintf("-target=%s", v))
 	}
-	for _, v := range config.VarFiles {
-		args = append(args, fmt.Sprintf("-var-file=%s", v))
-	}
-	for k, v := range config.Vars {
-		args = append(args, "-var", fmt.Sprintf("%s=%s", k, v))
-	}
+	args = append(args, varFiles(config.VarFiles)...)
+	args = append(args, vars(config.Vars)...)
 	if config.Parallelism > 0 {
 		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
 	}
@@ -292,12 +288,8 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 	for _, v := range config.Targets {
 		args = append(args, "--target", fmt.Sprintf("%s", v))
 	}
-	for _, v := range config.VarFiles {
-		args = append(args, fmt.Sprintf("-var-file=%s", v))
-	}
-	for k, v := range config.Vars {
-		args = append(args, "-var", fmt.Sprintf("%s=%s", k, v))
-	}
+	args = append(args, varFiles(config.VarFiles)...)
+	args = append(args, vars(config.Vars)...)
 	if config.Parallelism > 0 {
 		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
 	}
@@ -327,6 +319,22 @@ func tfValidate(config Config) *exec.Cmd {
 		"terraform",
 		args...,
 	)
+}
+
+func vars(vs map[string]string) []string {
+	var args []string
+	for k, v := range vs {
+		args = append(args, "-var", fmt.Sprintf("%s=%s", k, v))
+	}
+	return args
+}
+
+func varFiles(vfs []string) []string {
+	var args []string
+	for _, v := range vfs {
+		args = append(args, fmt.Sprintf("-var-file=%s", v))
+	}
+	return args
 }
 
 // helper function to write a netrc file.
