@@ -14,7 +14,11 @@ RUN apk -U add \
     ca-certificates \
     git \
     wget \
-    openssh-client && \
+    openssh-client \
+    python \
+    py-pip  && \
+    pip install --upgrade awscli && \
+    apk -v --purge del py-pip && \
     rm -rf /var/cache/apk/*
 
 ENV TERRAFORM_VERSION 0.11.7
