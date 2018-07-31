@@ -87,6 +87,16 @@ func TestPlugin(t *testing.T) {
 					args{config: Config{Targets: []string{"target1", "target2"}}},
 					exec.Command("terraform", "destroy", "-target=target1", "-target=target2", "-force"),
 				},
+				{
+					"with vars",
+					args{config: Config{Vars: map[string]string{"username": "someuser", "password": "1pass"}}},
+					exec.Command("terraform", "destroy", "-var", "username=someuser", "-var", "password=1pass", "-force"),
+				},
+				{
+					"with var-files",
+					args{config: Config{VarFiles: []string{"common.tfvars", "prod.tfvars"}}},
+					exec.Command("terraform", "destroy", "-var-file=common.tfvars", "-var-file=prod.tfvars", "-force"),
+				},
 			}
 
 			for _, tt := range tests {
@@ -118,6 +128,18 @@ func TestPlugin(t *testing.T) {
 					args{config: Config{}},
 					true,
 					exec.Command("terraform", "plan", "-destroy"),
+				},
+				{
+					"with vars",
+					args{config: Config{Vars: map[string]string{"username": "someuser", "password": "1pass"}}},
+					false,
+					exec.Command("terraform", "plan", "-out=plan.tfout", "-var", "username=someuser", "-var", "password=1pass"),
+				},
+				{
+					"with var-files",
+					args{config: Config{VarFiles: []string{"common.tfvars", "prod.tfvars"}}},
+					false,
+					exec.Command("terraform", "plan", "-out=plan.tfout", "-var-file=common.tfvars", "-var-file=prod.tfvars"),
 				},
 			}
 
