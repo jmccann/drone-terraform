@@ -53,6 +53,7 @@ func downloadFile(filepath string, url string) error {
 	return nil
 }
 
+// Unzip a file to a destination
 func Unzip(src, dest string) error {
 	r, err := zip.OpenReader(src)
 	if err != nil {

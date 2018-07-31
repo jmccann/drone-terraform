@@ -34,6 +34,7 @@ type (
 		VarFiles    []string
 	}
 
+	// Netrc is credentials for cloning
 	Netrc struct {
 		Machine  string
 		Login    string
