@@ -44,14 +44,14 @@ func TestPlugin(t *testing.T) {
 					exec.Command("terraform", "apply", "plan.tfout"),
 				},
 				{
-					"with targets",
-					args{config: Config{Targets: []string{"target1", "target2"}}},
-					exec.Command("terraform", "apply", "--target", "target1", "--target", "target2", "plan.tfout"),
-				},
-				{
 					"with parallelism",
 					args{config: Config{Parallelism: 5}},
 					exec.Command("terraform", "apply", "-parallelism=5", "plan.tfout"),
+				},
+				{
+					"with targets",
+					args{config: Config{Targets: []string{"target1", "target2"}}},
+					exec.Command("terraform", "apply", "--target", "target1", "--target", "target2", "plan.tfout"),
 				},
 			}
 
@@ -78,14 +78,14 @@ func TestPlugin(t *testing.T) {
 					exec.Command("terraform", "destroy", "-force"),
 				},
 				{
-					"with targets",
-					args{config: Config{Targets: []string{"target1", "target2"}}},
-					exec.Command("terraform", "destroy", "-target=target1", "-target=target2", "-force"),
-				},
-				{
 					"with parallelism",
 					args{config: Config{Parallelism: 5}},
 					exec.Command("terraform", "destroy", "-parallelism=5", "-force"),
+				},
+				{
+					"with targets",
+					args{config: Config{Targets: []string{"target1", "target2"}}},
+					exec.Command("terraform", "destroy", "-target=target1", "-target=target2", "-force"),
 				},
 			}
 
