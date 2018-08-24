@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -15,6 +16,13 @@ type (
 		Version string
 	}
 )
+
+func installProfile(profileName string, profileKey string, profileSecret string) error {
+	os.Mkdir(os.Getenv("HOME")+"/.aws", 0700)
+	myconf := []byte("[" + profileName + "]\naws_access_key_id = " + profileKey + "\naws_secret_access_key = " + profileSecret + "\n")
+	err := ioutil.WriteFile(os.Getenv("HOME")+"/.aws/credentials", myconf, 0644)
+	return err
+}
 
 func installTerraform(version string) error {
 	err := downloadTerraform(version)

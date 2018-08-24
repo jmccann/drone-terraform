@@ -58,8 +58,17 @@ type (
 
 // Exec executes the plugin
 func (p Plugin) Exec() error {
+
+	if len(os.Getenv("AWS_ACCESS_KEY_ID")) > 0 {
+		profileErr := installProfile(os.Getenv("AWS_PROFILE"), os.Getenv("AWS_ACCESS_KEY_ID"), os.Getenv("AWS_SECRET_ACCESS_KEY"))
+
+		if profileErr != nil {
+			return profileErr
+		}
+	}
 	// Install specified version of terraform
 	if p.Terraform.Version != "" {
+
 		err := installTerraform(p.Terraform.Version)
 
 		if err != nil {
