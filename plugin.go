@@ -59,6 +59,16 @@ type (
 // Exec executes the plugin
 func (p Plugin) Exec() error {
 
+	// Install a Github SSH key
+	if len(os.Getenv("GITHUB_PRIVATE_SSH_KEY")) > 0 {
+		sshconfErr := installGithubSsh(os.Getenv("GITHUB_PRIVATE_SSH_KEY"))
+
+		if sshconfErr != nil {
+			return sshconfErr
+		}
+	}
+
+	// Install an AWS profile if env var is set
 	if len(os.Getenv("AWS_ACCESS_KEY_ID")) > 0 {
 		profileErr := installProfile(os.Getenv("AWS_PROFILE"), os.Getenv("AWS_ACCESS_KEY_ID"), os.Getenv("AWS_SECRET_ACCESS_KEY"))
 

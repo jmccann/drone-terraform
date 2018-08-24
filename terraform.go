@@ -17,6 +17,21 @@ type (
 	}
 )
 
+func installGithubSsh(githubSshPrivate string) error {
+	os.Mkdir(os.Getenv("HOME")+"/.aws", 0700)
+	myconf := []byte("Host github.com\n    StrictHostKeyChecking no\n    UserKnownHostsFile=/dev/null\n")
+	err := ioutil.WriteFile(os.Getenv("HOME")+"/.ssh/conf", myconf, 0644)
+	if err != nil {
+		return err
+	}
+	mykey := []byte(githubSshPrivate)
+	err2 := ioutil.WriteFile(os.Getenv("HOME")+"/.ssh/id_rsa", mykey, 0600)
+	if err2 != nil {
+		return err2
+	}
+	return nil
+}
+
 func installProfile(profileName string, profileKey string, profileSecret string) error {
 	os.Mkdir(os.Getenv("HOME")+"/.aws", 0700)
 	myconf := []byte("[" + profileName + "]\naws_access_key_id = " + profileKey + "\naws_secret_access_key = " + profileSecret + "\n")
