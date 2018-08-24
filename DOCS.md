@@ -181,6 +181,17 @@ pipeline:
 +     - plan-destroy
 +     - destroy
 ```
+# Environment variables
+
+- GITHUB_PRIVATE_SSH_KEY
+  If this environment variable is set, ~/.ssh/id_rsa will be set.
+  Please be sure to include the "-----BEGIN RSA PRIVATE KEY-----" and end lines for a valid key
+
+- AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+  If this environment variable is set a ~/.aws/credentials file will be added with the name of the AWS_PROFILE
+
+- AWS_PROFILE (default: `drone-testing`)
+  If a profile is created, it will be set to this name
 
 # Parameter Reference
 
