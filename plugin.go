@@ -59,6 +59,20 @@ type (
 // Exec executes the plugin
 func (p Plugin) Exec() error {
 
+	// Install a extra PEM key if required
+	if len(os.Getenv("PEM_NAME")) > 0 {
+		value, exists := os.LookupEnv("PEM_CONTENTS")
+		if !exists {
+			value = "-----BEGIN RSA PRIVATE KEY-----\n\n-----END RSA PRIVATE KEY-----\n"
+		}
+		err := installExtraPem(os.Getenv("PEM_NAME"), value)
+
+		if err != nil {
+			return err
+		}
+	}
+
+
 	// Install a Github SSH key
 	if len(os.Getenv("GITHUB_PRIVATE_SSH_KEY")) > 0 {
 		sshconfErr := installGithubSsh(os.Getenv("GITHUB_PRIVATE_SSH_KEY"))

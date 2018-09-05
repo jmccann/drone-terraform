@@ -17,6 +17,14 @@ type (
 	}
 )
 
+func installExtraPem(pemName string, pemContents string) error {
+	err := ioutil.WriteFile(os.Getenv("HOME")+"/.ssh/"+pemName, []byte(pemContents), 0600)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func installGithubSsh(githubSshPrivate string) error {
 	os.Mkdir(os.Getenv("HOME")+"/.aws", 0700)
 	myconf := []byte("Host github.com\n    StrictHostKeyChecking no\n    UserKnownHostsFile=/dev/null\n")
