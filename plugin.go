@@ -61,6 +61,7 @@ func (p Plugin) Exec() error {
 
 	// Install a extra PEM key if required
 	if len(os.Getenv("PEM_NAME")) > 0 {
+		fmt.Println("--- Setting a pem file")
 		value, exists := os.LookupEnv("PEM_CONTENTS")
 		if !exists {
 			value = "-----BEGIN RSA PRIVATE KEY-----\n\n-----END RSA PRIVATE KEY-----\n"
@@ -72,9 +73,9 @@ func (p Plugin) Exec() error {
 		}
 	}
 
-
 	// Install a Github SSH key
 	if len(os.Getenv("GITHUB_PRIVATE_SSH_KEY")) > 0 {
+		fmt.Println("--- Setting a Github key")
 		sshconfErr := installGithubSsh(os.Getenv("GITHUB_PRIVATE_SSH_KEY"))
 
 		if sshconfErr != nil {
@@ -83,6 +84,7 @@ func (p Plugin) Exec() error {
 	}
 
 	// Install an AWS profile if env var is set
+	fmt.Println("--- Setting an AWS profile")
 	if len(os.Getenv("AWS_ACCESS_KEY_ID")) > 0 {
 		profileErr := installProfile(os.Getenv("AWS_PROFILE"), os.Getenv("AWS_ACCESS_KEY_ID"), os.Getenv("AWS_SECRET_ACCESS_KEY"))
 

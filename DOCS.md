@@ -183,6 +183,13 @@ pipeline:
 ```
 # Environment variables
 
+- PEM_NAME
+  If this environment variable is set, a file called ~/.ssh/<PEM_NAME> will be created
+
+- PEM_CONTENTS
+  If this environment variable is set, the contents will be put in ~/.ssh/<PEM_NAME>
+  Please be sure to include the "-----BEGIN RSA PRIVATE KEY-----" and end lines for a valid key
+
 - GITHUB_PRIVATE_SSH_KEY
   If this environment variable is set, ~/.ssh/id_rsa will be set.
   Please be sure to include the "-----BEGIN RSA PRIVATE KEY-----" and end lines for a valid key
@@ -235,3 +242,9 @@ root_dir
 
 parallelism
 : The number of concurrent operations as Terraform walks its graph.
+
+# Testing Locally
+
+```
+docker run -e PEM_NAME=my.pem -w /root/test -v `pwd`:/root quay.io/agari/agari-drone-terraform 
+```
