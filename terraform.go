@@ -18,6 +18,7 @@ type (
 )
 
 func installExtraPem(pemName string, pemContents string) error {
+	os.Mkdir(os.Getenv("HOME")+"/.ssh", 0700)
 	err := ioutil.WriteFile(os.Getenv("HOME")+"/.ssh/"+pemName, []byte(pemContents), 0600)
 	if err != nil {
 		return err
