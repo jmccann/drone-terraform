@@ -16,22 +16,24 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/joho/godotenv"
 )
 
 type (
 	// Config holds input parameters for the plugin
 	Config struct {
-		Actions     []string
-		Vars        map[string]string
-		Secrets     map[string]string
-		InitOptions InitOptions
-		Cacert      string
-		Sensitive   bool
-		RoleARN     string
-		RootDir     string
-		Parallelism int
-		Targets     []string
-		VarFiles    []string
+		Actions       []string
+		Vars          map[string]string
+		Secrets       map[string]string
+		InitOptions   InitOptions
+		Cacert        string
+		Sensitive     bool
+		RoleARN       string
+		RootDir       string
+		Parallelism   int
+		Targets       []string
+		VarFiles      []string
+		DeployEnvPath string
 	}
 
 	// Netrc is credentials for cloning
@@ -81,6 +83,7 @@ func (p Plugin) Exec() error {
 
 	commands = append(commands, exec.Command("terraform", "version"))
 
+	p.CopyDeployEnv()
 	CopyTfEnv()
 
 	if p.Config.Cacert != "" {
@@ -137,6 +140,18 @@ func (p Plugin) Exec() error {
 	}
 
 	return nil
+}
+
+// CopyDeployEnv export env var from DeployEnvPath file
+func (p Plugin) CopyDeployEnv() {
+	envMap, err := godotenv.Read(p.Config.DeployEnvPath)
+	if err != nil {
+		return
+	}
+
+	for k, v := range envMap {
+		os.Setenv(k, v)
+	}
 }
 
 // CopyTfEnv creates copies of TF_VAR_ to lowercase
