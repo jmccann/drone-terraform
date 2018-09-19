@@ -20,7 +20,7 @@ See [DOCS.md](DOCS.md) for more info and examples.
 * Update embedded TF to `0.10.8`
 
 ## 4.0-0.10.7 (2017-10-20)
-* Persist state locking config (https://github.com/jmccann/drone-terraform/pull/55)
+* Persist state locking config (https://github.com/quay.io/agari/agari-drone-terraform/pull/55)
 * Update embedded TF to `0.10.7`
 
 ## 4.0-0.10.3 (2017-09-06)

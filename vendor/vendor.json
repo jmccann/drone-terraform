@@ -181,5 +181,5 @@
 			"revisionTime": "2016-10-06T02:47:49Z"
 		}
 	],
-	"rootPath": "github.com/jmccann/drone-terraform"
+	"rootPath": "github.com/quay.io/agari/agari-drone-terraform"
 }
