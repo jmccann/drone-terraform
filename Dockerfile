@@ -61,6 +61,11 @@ RUN wget -P /usr/local/bin/ https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3
 
 RUN mkdir -p /root/.terraform.d/plugins/
 
+# Ensure we have github key in known hosts
+RUN mkdir /root/.ssh && chmod 700 /root/.ssh
+RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
+
+
 COPY --from=tfbuilder /go/bin/terraform-provider-kubernetes /root/.terraform.d/plugins/
 COPY --from=builder /go/bin/drone-terraform /bin/
 ENTRYPOINT ["/bin/drone-terraform"]
