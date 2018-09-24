@@ -8,7 +8,7 @@ logo: terraform.svg
 image: quay.io/agari/agari-drone-terraform
 ---
 
-The Terraform plugin applies the infrastructure configuration contained within the repository. The below pipeline configuration demonstrates simple usage which will run a `validate`, `plan` and `apply`:
+The Terraform plugin applies the infrastructure configuration contained within the repository. The below pipeline configuration demonstrates simple usage which will run a `validate`, `show`, `plan` and `apply`:
 
 ```yaml
 pipeline:
@@ -33,9 +33,12 @@ Example of explicitly specifying `actions` to perform a dry run.
 pipeline:
   terraform:
     image: quay.io/agari/agari-drone-terraform:5
+    planfile: "../planshare.out"
+    difffile: "../diff.out"
 +   actions:
 +     - validate
 +     - plan
++     - show
 ```
 
 Example configuration passing secrets to terraform.  Please read

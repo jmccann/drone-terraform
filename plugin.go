@@ -29,6 +29,7 @@ type (
 		Sensitive   bool
 		RoleARN     string
 		Planfile    string
+		Difffile    string
 		RootDir     string
 		Parallelism int
 		Targets     []string
@@ -135,10 +136,12 @@ func (p Plugin) Exec() error {
 			commands = append(commands, tfPlan(p.Config, true))
 		case "apply":
 			commands = append(commands, tfApply(p.Config))
+		case "show":
+			commands = append(commands, tfShow(p.Config))
 		case "destroy":
 			commands = append(commands, tfDestroy(p.Config))
 		default:
-			return fmt.Errorf("valid actions are: validate, plan, apply, plan-destroy, destroy.  You provided %s", action)
+			return fmt.Errorf("valid actions are: validate, plan, show, apply, plan-destroy, destroy.  You provided %s", action)
 		}
 	}
 
@@ -257,6 +260,20 @@ func installCaCert(cacert string) *exec.Cmd {
 
 func trace(cmd *exec.Cmd) {
 	fmt.Println("$", strings.Join(cmd.Args, " "))
+}
+
+func tfShow(config Config) *exec.Cmd {
+	args := []string{
+		"show",
+		"-no-color",
+	}
+	if config.Difffile != "" {
+		args = append(args, config.Difffile)
+	}
+	return exec.Command(
+		"terraform",
+		args...,
+	)
 }
 
 func tfApply(config Config) *exec.Cmd {

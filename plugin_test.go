@@ -27,6 +27,34 @@ func TestPlugin(t *testing.T) {
 		})
 	})
 
+	g.Describe("tfShow", func() {
+		g.It("Should return correct apply commands given the arguments", func() {
+			type args struct {
+				config Config
+			}
+
+			tests := []struct {
+				name string
+				args args
+				want *exec.Cmd
+			}{
+				{
+					"default",
+					args{config: Config{}},
+					exec.Command("terraform", "show", "-no-color"),
+				},
+				{
+					"with planfile",
+					args{config: Config{Difffile: "/tmp/plan.tfout"}},
+					exec.Command("terraform", "show", "-no-color", "/tmp/plan.tfout"),
+				},
+			}
+			for _, tt := range tests {
+				g.Assert(tfShow(tt.args.config)).Equal(tt.want)
+			}
+		})
+	})
+
 	g.Describe("tfApply", func() {
 		g.It("Should return correct apply commands given the arguments", func() {
 			type args struct {
