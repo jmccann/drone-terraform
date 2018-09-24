@@ -268,7 +268,7 @@ func tfShow(config Config) *exec.Cmd {
 		"-no-color",
 	}
 	if config.Difffile != "" {
-		args = append(args, config.Difffile)
+		args = append(args, config.Planfile)
 	}
 	return exec.Command(
 		"terraform",
