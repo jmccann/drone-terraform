@@ -44,6 +44,11 @@ func TestPlugin(t *testing.T) {
 					exec.Command("terraform", "apply", "plan.tfout"),
 				},
 				{
+					"with path",
+					args{config: Config{PlanPath: "/tmp/a.tfout"}},
+					exec.Command("terraform", "apply", "/tmp/a.tfout"),
+				},
+				{
 					"with parallelism",
 					args{config: Config{Parallelism: 5}},
 					exec.Command("terraform", "apply", "-parallelism=5", "plan.tfout"),
@@ -122,6 +127,12 @@ func TestPlugin(t *testing.T) {
 					args{config: Config{}},
 					false,
 					exec.Command("terraform", "plan", "-out=plan.tfout"),
+				},
+				{
+					"with path",
+					args{config: Config{PlanPath: "/tmp/a.tfout"}},
+					false,
+					exec.Command("terraform", "plan", "-out=/tmp/a.tfout"),
 				},
 				{
 					"destroy",

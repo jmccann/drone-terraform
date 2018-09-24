@@ -28,6 +28,7 @@ type (
 		Cacert      string
 		Sensitive   bool
 		RoleARN     string
+		PlanPath    string
 		RootDir     string
 		Parallelism int
 		Targets     []string
@@ -277,7 +278,11 @@ func tfApply(config Config) *exec.Cmd {
 	if config.InitOptions.LockTimeout != "" {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
-	args = append(args, "plan.tfout")
+	if config.PlanPath != "" {
+		args = append(args, config.PlanPath)
+	} else {
+		args = append(args, "plan.tfout")
+	}
 	return exec.Command(
 		"terraform",
 		args...,
@@ -316,6 +321,8 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 
 	if destroy {
 		args = append(args, "-destroy")
+	} else if config.PlanPath != "" {
+		args = append(args, fmt.Sprintf("-out=%s", config.PlanPath))
 	} else {
 		args = append(args, "-out=plan.tfout")
 	}

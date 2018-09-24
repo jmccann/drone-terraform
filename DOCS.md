@@ -171,6 +171,18 @@ pipeline:
 +   parallelism: 2
 ```
 
+You may want to specify the out directory of the plan file so you can pass it to builds further down the pipeline
+If you want to change Terraform's default outfile (currently plan.tfout in the cwd) then set the `plan_path` parameter.
+
+```diff
+pipeline:
+  terraform:
+    image: quay.io/agari/agari-drone-terraform:5
++   plan_path: /tmp/a.out
+```
+
+Destroying the service can be done by specifying `plan-destroy` and `destroy` actions. Keep in mind that Fastly won't allow a service with active version be destroyed. Use `force_destroy` option in the service definition for terraform to handle it.
+
 Destroying the service can be done by specifying `plan-destroy` and `destroy` actions. Keep in mind that Fastly won't allow a service with active version be destroyed. Use `force_destroy` option in the service definition for terraform to handle it.
 
 ```yaml

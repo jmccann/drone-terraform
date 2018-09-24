@@ -49,6 +49,11 @@ func main() {
 			EnvVar: "PLUGIN_PARALLELISM",
 		},
 		cli.StringFlag{
+			Name:   "plan_path",
+			Usage:  "The absolute path to save the outfile eg: /tmp/myplan.tfout",
+			EnvVar: "PLAN_PATH",
+		},
+		cli.StringFlag{
 			Name:   "netrc.machine",
 			Usage:  "netrc machine",
 			EnvVar: "DRONE_NETRC_MACHINE",
@@ -146,6 +151,7 @@ func run(c *cli.Context) error {
 			RoleARN:     c.String("role_arn_to_assume"),
 			RootDir:     c.String("root_dir"),
 			Parallelism: c.Int("parallelism"),
+			PlanPath:    c.String("plan_path"),
 			Targets:     c.StringSlice("targets"),
 			VarFiles:    c.StringSlice("var_files"),
 		},
