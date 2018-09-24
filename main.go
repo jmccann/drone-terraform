@@ -51,7 +51,7 @@ func main() {
 		cli.StringFlag{
 			Name:   "plan_path",
 			Usage:  "The absolute path to save the outfile eg: /tmp/myplan.tfout",
-			EnvVar: "PLAN_PATH",
+			EnvVar: "PLUGIN_PLAN_PATH",
 		},
 		cli.StringFlag{
 			Name:   "netrc.machine",
