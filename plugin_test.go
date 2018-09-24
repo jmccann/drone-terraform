@@ -45,7 +45,7 @@ func TestPlugin(t *testing.T) {
 				},
 				{
 					"with path",
-					args{config: Config{PlanPath: "/tmp/a.tfout"}},
+					args{config: Config{Planfile: "/tmp/a.tfout"}},
 					exec.Command("terraform", "apply", "/tmp/a.tfout"),
 				},
 				{
@@ -130,7 +130,7 @@ func TestPlugin(t *testing.T) {
 				},
 				{
 					"with path",
-					args{config: Config{PlanPath: "/tmp/a.tfout"}},
+					args{config: Config{Planfile: "/tmp/a.tfout"}},
 					false,
 					exec.Command("terraform", "plan", "-out=/tmp/a.tfout"),
 				},

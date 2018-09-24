@@ -28,7 +28,7 @@ type (
 		Cacert      string
 		Sensitive   bool
 		RoleARN     string
-		PlanPath    string
+		Planfile    string
 		RootDir     string
 		Parallelism int
 		Targets     []string
@@ -275,12 +275,9 @@ func tfApply(config Config) *exec.Cmd {
 	if config.InitOptions.LockTimeout != "" {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
-	if config.PlanPath != "" {
-		fmt.Println("--- Setting an outpath---")
-		args = append(args, config.PlanPath)
+	if config.Planfile != "" {
+		args = append(args, config.Planfile)
 	} else {
-		fmt.Println("--- borked ---")
-		fmt.Println(config.PlanPath)
 		args = append(args, "plan.tfout")
 	}
 	return exec.Command(
@@ -319,10 +316,15 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 		"plan",
 	}
 
+	logrus.WithFields(logrus.Fields{
+		"Config.Parallelism": config.Parallelism,
+		"Config.Planfile":    config.Planfile,
+	}).Info("Configuration")
+
 	if destroy {
 		args = append(args, "-destroy")
-	} else if config.PlanPath != "" {
-		args = append(args, fmt.Sprintf("-out=%s", config.PlanPath))
+	} else if config.Planfile != "" {
+		args = append(args, fmt.Sprintf("-out=%s", config.Planfile))
 	} else {
 		args = append(args, "-out=plan.tfout")
 	}

@@ -39,6 +39,11 @@ func main() {
 			Usage: "source env file",
 		},
 		cli.StringFlag{
+			Name:   "planfile",
+			Usage:  "The absolute path to save the outfile eg: /tmp/myplan.tfout",
+			EnvVar: "PLUGIN_PLANFILE",
+		},
+		cli.StringFlag{
 			Name:   "init_options",
 			Usage:  "options for the init command. See https://www.terraform.io/docs/commands/init.html",
 			EnvVar: "PLUGIN_INIT_OPTIONS",
@@ -47,11 +52,6 @@ func main() {
 			Name:   "parallelism",
 			Usage:  "The number of concurrent operations as Terraform walks its graph",
 			EnvVar: "PLUGIN_PARALLELISM",
-		},
-		cli.StringFlag{
-			Name:   "plan_path",
-			Usage:  "The absolute path to save the outfile eg: /tmp/myplan.tfout",
-			EnvVar: "PLUGIN_PLAN_PATH",
 		},
 		cli.StringFlag{
 			Name:   "netrc.machine",
@@ -151,7 +151,7 @@ func run(c *cli.Context) error {
 			RoleARN:     c.String("role_arn_to_assume"),
 			RootDir:     c.String("root_dir"),
 			Parallelism: c.Int("parallelism"),
-			PlanPath:    c.String("plan_path"),
+			Planfile:    c.String("planfile"),
 			Targets:     c.StringSlice("targets"),
 			VarFiles:    c.StringSlice("var_files"),
 		},
