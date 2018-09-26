@@ -56,6 +56,11 @@ type (
 		Netrc     Netrc
 		Terraform Terraform
 	}
+
+	TfCommand struct {
+		Tfcmd *exec.Cmd
+		Ofile string
+	}
 )
 
 // Exec executes the plugin
@@ -111,17 +116,17 @@ func (p Plugin) Exec() error {
 		return err
 	}
 
-	var commands []*exec.Cmd
+	var commands []TfCommand
 
-	commands = append(commands, exec.Command("terraform", "version"))
+	commands = append(commands, TfCommand{Tfcmd: exec.Command("terraform", "version")})
 
 	CopyTfEnv()
 
 	if p.Config.Cacert != "" {
-		commands = append(commands, installCaCert(p.Config.Cacert))
+		commands = append(commands, TfCommand{Tfcmd: installCaCert(p.Config.Cacert)})
 	}
 
-	commands = append(commands, deleteCache())
+	commands = append(commands, TfCommand{Tfcmd: deleteCache()})
 	commands = append(commands, initCommand(p.Config.InitOptions))
 	commands = append(commands, getModules())
 
@@ -145,25 +150,25 @@ func (p Plugin) Exec() error {
 		}
 	}
 
-	commands = append(commands, deleteCache())
+	commands = append(commands, TfCommand{Tfcmd: deleteCache()})
 
 	for _, c := range commands {
-		if c.Dir == "" {
+		if c.Tfcmd.Dir == "" {
 			wd, err := os.Getwd()
 			if err == nil {
-				c.Dir = wd
+				c.Tfcmd.Dir = wd
 			}
 		}
 		if p.Config.RootDir != "" {
-			c.Dir = c.Dir + "/" + p.Config.RootDir
+			c.Tfcmd.Dir = c.Tfcmd.Dir + "/" + p.Config.RootDir
 		}
-		c.Stdout = os.Stdout
-		c.Stderr = os.Stderr
+		c.Tfcmd.Stdout = os.Stdout
+		c.Tfcmd.Stderr = os.Stderr
 		if !p.Config.Sensitive {
-			trace(c)
+			trace(c.Tfcmd)
 		}
 
-		err := c.Run()
+		err := c.Tfcmd.Run()
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
 				"error": err,
@@ -216,14 +221,15 @@ func deleteCache() *exec.Cmd {
 	)
 }
 
-func getModules() *exec.Cmd {
-	return exec.Command(
+func getModules() TfCommand {
+	cmd := exec.Command(
 		"terraform",
 		"get",
 	)
+	return (TfCommand{Tfcmd: cmd})
 }
 
-func initCommand(config InitOptions) *exec.Cmd {
+func initCommand(config InitOptions) TfCommand {
 	args := []string{
 		"init",
 	}
@@ -245,10 +251,11 @@ func initCommand(config InitOptions) *exec.Cmd {
 	// Fail Terraform execution on prompt
 	args = append(args, "-input=false")
 
-	return exec.Command(
+	cmd := exec.Command(
 		"terraform",
 		args...,
 	)
+	return (TfCommand{Tfcmd: cmd})
 }
 
 func installCaCert(cacert string) *exec.Cmd {
@@ -262,7 +269,7 @@ func trace(cmd *exec.Cmd) {
 	fmt.Println("$", strings.Join(cmd.Args, " "))
 }
 
-func tfShow(config Config) *exec.Cmd {
+func tfShow(config Config) TfCommand {
 	args := []string{
 		"show",
 		"-no-color",
@@ -270,13 +277,17 @@ func tfShow(config Config) *exec.Cmd {
 	if config.Difffile != "" {
 		args = append(args, config.Planfile)
 	}
-	return exec.Command(
+
+	cmd := exec.Command(
 		"terraform",
 		args...,
 	)
+
+	return (TfCommand{Tfcmd: cmd})
+
 }
 
-func tfApply(config Config) *exec.Cmd {
+func tfApply(config Config) TfCommand {
 	args := []string{
 		"apply",
 	}
@@ -297,13 +308,14 @@ func tfApply(config Config) *exec.Cmd {
 	} else {
 		args = append(args, "plan.tfout")
 	}
-	return exec.Command(
+	cmd := exec.Command(
 		"terraform",
 		args...,
 	)
+	return (TfCommand{Tfcmd: cmd})
 }
 
-func tfDestroy(config Config) *exec.Cmd {
+func tfDestroy(config Config) TfCommand {
 	args := []string{
 		"destroy",
 	}
@@ -322,13 +334,14 @@ func tfDestroy(config Config) *exec.Cmd {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
 	args = append(args, "-force")
-	return exec.Command(
+	cmd := exec.Command(
 		"terraform",
 		args...,
 	)
+	return (TfCommand{Tfcmd: cmd})
 }
 
-func tfPlan(config Config, destroy bool) *exec.Cmd {
+func tfPlan(config Config, destroy bool) TfCommand {
 	args := []string{
 		"plan",
 	}
@@ -360,13 +373,14 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 	if config.InitOptions.LockTimeout != "" {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
-	return exec.Command(
+	cmd := exec.Command(
 		"terraform",
 		args...,
 	)
+	return (TfCommand{Tfcmd: cmd})
 }
 
-func tfValidate(config Config) *exec.Cmd {
+func tfValidate(config Config) TfCommand {
 	args := []string{
 		"validate",
 	}
@@ -376,10 +390,11 @@ func tfValidate(config Config) *exec.Cmd {
 	for k, v := range config.Vars {
 		args = append(args, "-var", fmt.Sprintf("%s=%s", k, v))
 	}
-	return exec.Command(
+	cmd := exec.Command(
 		"terraform",
 		args...,
 	)
+	return (TfCommand{Tfcmd: cmd})
 }
 
 func vars(vs map[string]string) []string {

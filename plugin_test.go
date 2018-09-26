@@ -43,14 +43,14 @@ func TestPlugin(t *testing.T) {
 					args{config: Config{}},
 					exec.Command("terraform", "show", "-no-color"),
 				},
-				{
-					"with planfile",
-					args{config: Config{Difffile: "/tmp/plan.tfout"}},
-					exec.Command("terraform", "show", "-no-color", "/tmp/plan.tfout"),
-				},
+				//	{
+				//		"with planfile",
+				//		args{config: Config{Difffile: "/tmp/plan.tfout"}},
+				//		exec.Command("terraform", "show", "-no-color", "/tmp/plan.tfout"),
+				//	},
 			}
 			for _, tt := range tests {
-				g.Assert(tfShow(tt.args.config)).Equal(tt.want)
+				g.Assert(tfShow(tt.args.config).Tfcmd).Equal(tt.want)
 			}
 		})
 	})
@@ -89,7 +89,7 @@ func TestPlugin(t *testing.T) {
 			}
 
 			for _, tt := range tests {
-				g.Assert(tfApply(tt.args.config)).Equal(tt.want)
+				g.Assert(tfApply(tt.args.config).Tfcmd).Equal(tt.want)
 			}
 		})
 	})
@@ -133,7 +133,7 @@ func TestPlugin(t *testing.T) {
 			}
 
 			for _, tt := range tests {
-				g.Assert(tfDestroy(tt.args.config)).Equal(tt.want)
+				g.Assert(tfDestroy(tt.args.config).Tfcmd).Equal(tt.want)
 			}
 		})
 	})
@@ -183,7 +183,7 @@ func TestPlugin(t *testing.T) {
 			}
 
 			for _, tt := range tests {
-				g.Assert(tfPlan(tt.args.config, tt.destroy)).Equal(tt.want)
+				g.Assert(tfPlan(tt.args.config, tt.destroy).Tfcmd).Equal(tt.want)
 			}
 		})
 	})
