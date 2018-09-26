@@ -43,11 +43,11 @@ func TestPlugin(t *testing.T) {
 					args{config: Config{}},
 					exec.Command("terraform", "show", "-no-color"),
 				},
-				//	{
-				//		"with planfile",
-				//		args{config: Config{Difffile: "/tmp/plan.tfout"}},
-				//		exec.Command("terraform", "show", "-no-color", "/tmp/plan.tfout"),
-				//	},
+				{
+					"with planfile",
+					args{config: Config{Planfile: "/tmp/plan.tfout", Difffile: "/tmp/plan.diff"}},
+					exec.Command("terraform", "show", "-no-color", "/tmp/plan.tfout"),
+				},
 			}
 			for _, tt := range tests {
 				g.Assert(tfShow(tt.args.config).Tfcmd).Equal(tt.want)
