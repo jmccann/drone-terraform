@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -162,19 +164,44 @@ func (p Plugin) Exec() error {
 		if p.Config.RootDir != "" {
 			c.Tfcmd.Dir = c.Tfcmd.Dir + "/" + p.Config.RootDir
 		}
-		c.Tfcmd.Stdout = os.Stdout
-		c.Tfcmd.Stderr = os.Stderr
-		if !p.Config.Sensitive {
-			trace(c.Tfcmd)
-		}
 
-		err := c.Tfcmd.Run()
-		if err != nil {
-			logrus.WithFields(logrus.Fields{
-				"error": err,
-			}).Fatal("Failed to execute a command")
+		if c.Ofile == "" {
+			c.Tfcmd.Stdout = os.Stdout
+			c.Tfcmd.Stderr = os.Stderr
+			if !p.Config.Sensitive {
+				trace(c.Tfcmd)
+			}
+
+			err := c.Tfcmd.Run()
+			if err != nil {
+				logrus.WithFields(logrus.Fields{
+					"error": err,
+				}).Fatal("Failed to execute a command")
+			}
+		} else {
+			// open the out file for writing
+			outfile, err := os.Create(c.Ofile)
+			if err != nil {
+				panic(err)
+			}
+			defer outfile.Close()
+
+			stdoutPipe, err := c.Tfcmd.StdoutPipe()
+			if err != nil {
+				panic(err)
+			}
+
+			writer := bufio.NewWriter(outfile)
+
+			err = c.Tfcmd.Start()
+			if err != nil {
+				panic(err)
+			}
+
+			go io.Copy(writer, stdoutPipe)
+			c.Tfcmd.Wait()
+
 		}
-		logrus.Debug("Command completed successfully")
 	}
 
 	return nil
