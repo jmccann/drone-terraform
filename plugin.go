@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -179,27 +177,20 @@ func (p Plugin) Exec() error {
 				}).Fatal("Failed to execute a command")
 			}
 		} else {
-			// open the out file for writing
-			outfile, err := os.Create(c.Ofile)
+			logrus.WithFields(logrus.Fields{
+				"file":    c.Ofile,
+				"command": strings.Join(c.Tfcmd.Args, " "),
+			}).Info("Command")
+
+			out, err := c.Tfcmd.CombinedOutput()
 			if err != nil {
-				panic(err)
+				logrus.WithFields(logrus.Fields{
+					"command": strings.Join(c.Tfcmd.Args, " "),
+					"error":   err,
+				}).Fatal("Failed to execute a command")
 			}
-			defer outfile.Close()
-
-			stdoutPipe, err := c.Tfcmd.StdoutPipe()
-			if err != nil {
-				panic(err)
-			}
-
-			writer := bufio.NewWriter(outfile)
-
-			err = c.Tfcmd.Start()
-			if err != nil {
-				panic(err)
-			}
-
-			go io.Copy(writer, stdoutPipe)
-			c.Tfcmd.Wait()
+			f, _ := os.Create(c.Ofile)
+			f.Write(out)
 
 		}
 	}
