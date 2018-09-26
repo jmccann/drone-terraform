@@ -274,6 +274,7 @@ func tfShow(config Config) TfCommand {
 		"show",
 		"-no-color",
 	}
+	ofile := config.Difffile
 	if config.Difffile != "" {
 		args = append(args, config.Planfile)
 	}
@@ -283,7 +284,7 @@ func tfShow(config Config) TfCommand {
 		args...,
 	)
 
-	return (TfCommand{Tfcmd: cmd})
+	return (TfCommand{Tfcmd: cmd, Ofile: ofile})
 
 }
 
