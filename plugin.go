@@ -197,6 +197,11 @@ func (p Plugin) Exec() error {
 				}).Fatal("Failed to write file")
 			}
 			f.Write(out)
+			f.Sync()
+			logrus.WithFields(logrus.Fields{
+				"file":      c.Ofile,
+				"contenets": string(out),
+			}).Info("Logging output")
 			f.Close()
 
 		}
