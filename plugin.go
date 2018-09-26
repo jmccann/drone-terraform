@@ -189,8 +189,15 @@ func (p Plugin) Exec() error {
 					"error":   err,
 				}).Fatal("Failed to execute a command")
 			}
-			f, _ := os.Create(c.Ofile)
+			f, outferr := os.Create(c.Ofile)
+			if outferr != nil {
+				logrus.WithFields(logrus.Fields{
+					"command": strings.Join(c.Tfcmd.Args, " "),
+					"error":   outferr,
+				}).Fatal("Failed to write file")
+			}
 			f.Write(out)
+			f.Close()
 
 		}
 	}
