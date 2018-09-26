@@ -27,6 +27,34 @@ func TestPlugin(t *testing.T) {
 		})
 	})
 
+	g.Describe("tfShow", func() {
+		g.It("Should return correct apply commands given the arguments", func() {
+			type args struct {
+				config Config
+			}
+
+			tests := []struct {
+				name string
+				args args
+				want *exec.Cmd
+			}{
+				{
+					"default",
+					args{config: Config{}},
+					exec.Command("terraform", "show", "-no-color"),
+				},
+				{
+					"with planfile",
+					args{config: Config{Planfile: "/tmp/plan.tfout", Difffile: "/tmp/plan.diff"}},
+					exec.Command("terraform", "show", "-no-color", "/tmp/plan.tfout"),
+				},
+			}
+			for _, tt := range tests {
+				g.Assert(tfShow(tt.args.config).Tfcmd).Equal(tt.want)
+			}
+		})
+	})
+
 	g.Describe("tfApply", func() {
 		g.It("Should return correct apply commands given the arguments", func() {
 			type args struct {
@@ -44,6 +72,11 @@ func TestPlugin(t *testing.T) {
 					exec.Command("terraform", "apply", "plan.tfout"),
 				},
 				{
+					"with path",
+					args{config: Config{Planfile: "/tmp/a.tfout"}},
+					exec.Command("terraform", "apply", "/tmp/a.tfout"),
+				},
+				{
 					"with parallelism",
 					args{config: Config{Parallelism: 5}},
 					exec.Command("terraform", "apply", "-parallelism=5", "plan.tfout"),
@@ -56,7 +89,7 @@ func TestPlugin(t *testing.T) {
 			}
 
 			for _, tt := range tests {
-				g.Assert(tfApply(tt.args.config)).Equal(tt.want)
+				g.Assert(tfApply(tt.args.config).Tfcmd).Equal(tt.want)
 			}
 		})
 	})
@@ -100,7 +133,7 @@ func TestPlugin(t *testing.T) {
 			}
 
 			for _, tt := range tests {
-				g.Assert(tfDestroy(tt.args.config)).Equal(tt.want)
+				g.Assert(tfDestroy(tt.args.config).Tfcmd).Equal(tt.want)
 			}
 		})
 	})
@@ -124,6 +157,12 @@ func TestPlugin(t *testing.T) {
 					exec.Command("terraform", "plan", "-out=plan.tfout"),
 				},
 				{
+					"with path",
+					args{config: Config{Planfile: "/tmp/a.tfout"}},
+					false,
+					exec.Command("terraform", "plan", "-out=/tmp/a.tfout"),
+				},
+				{
 					"destroy",
 					args{config: Config{}},
 					true,
@@ -144,7 +183,7 @@ func TestPlugin(t *testing.T) {
 			}
 
 			for _, tt := range tests {
-				g.Assert(tfPlan(tt.args.config, tt.destroy)).Equal(tt.want)
+				g.Assert(tfPlan(tt.args.config, tt.destroy).Tfcmd).Equal(tt.want)
 			}
 		})
 	})

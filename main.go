@@ -27,7 +27,7 @@ func main() {
 			Name:   "actions",
 			Usage:  "a list of actions to have terraform perform",
 			EnvVar: "PLUGIN_ACTIONS",
-			Value:  &cli.StringSlice{"validate", "plan", "apply"},
+			Value:  &cli.StringSlice{"validate", "plan", "show", "apply"},
 		},
 		cli.StringFlag{
 			Name:   "ca_cert",
@@ -37,6 +37,16 @@ func main() {
 		cli.StringFlag{
 			Name:  "env-file",
 			Usage: "source env file",
+		},
+		cli.StringFlag{
+			Name:   "planfile",
+			Usage:  "The absolute path to save the outfile eg: /tmp/myplan.tfout",
+			EnvVar: "PLUGIN_PLANFILE",
+		},
+		cli.StringFlag{
+			Name:   "difffile",
+			Usage:  "The absolute path to save the diff file to eg: /tmp/myplan.diff",
+			EnvVar: "PLUGIN_DIFFFILE",
 		},
 		cli.StringFlag{
 			Name:   "init_options",
@@ -146,6 +156,8 @@ func run(c *cli.Context) error {
 			RoleARN:     c.String("role_arn_to_assume"),
 			RootDir:     c.String("root_dir"),
 			Parallelism: c.Int("parallelism"),
+			Planfile:    c.String("planfile"),
+			Difffile:    c.String("difffile"),
 			Targets:     c.StringSlice("targets"),
 			VarFiles:    c.StringSlice("var_files"),
 		},

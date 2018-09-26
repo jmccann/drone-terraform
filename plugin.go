@@ -28,6 +28,8 @@ type (
 		Cacert      string
 		Sensitive   bool
 		RoleARN     string
+		Planfile    string
+		Difffile    string
 		RootDir     string
 		Parallelism int
 		Targets     []string
@@ -54,12 +56,49 @@ type (
 		Netrc     Netrc
 		Terraform Terraform
 	}
+
+	TfCommand struct {
+		Tfcmd *exec.Cmd
+		Ofile string
+	}
 )
 
 // Exec executes the plugin
 func (p Plugin) Exec() error {
+
+	// Install a extra PEM key if required
+	if len(os.Getenv("PEM_NAME")) > 0 {
+		value, exists := os.LookupEnv("PEM_CONTENTS")
+		if !exists {
+			value = "-----BEGIN RSA PRIVATE KEY-----\n\n-----END RSA PRIVATE KEY-----\n"
+		}
+		err := installExtraPem(os.Getenv("PEM_NAME"), value)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	// Install a Github SSH key
+	if len(os.Getenv("GITHUB_PRIVATE_SSH_KEY")) > 0 {
+		sshconfErr := installGithubSsh(os.Getenv("GITHUB_PRIVATE_SSH_KEY"))
+
+		if sshconfErr != nil {
+			return sshconfErr
+		}
+	}
+
+	// Install an AWS profile if env var is set
+	if len(os.Getenv("AWS_ACCESS_KEY_ID")) > 0 {
+		profileErr := installProfile(os.Getenv("AWS_PROFILE"), os.Getenv("AWS_ACCESS_KEY_ID"), os.Getenv("AWS_SECRET_ACCESS_KEY"))
+
+		if profileErr != nil {
+			return profileErr
+		}
+	}
 	// Install specified version of terraform
 	if p.Terraform.Version != "" {
+
 		err := installTerraform(p.Terraform.Version)
 
 		if err != nil {
@@ -77,17 +116,17 @@ func (p Plugin) Exec() error {
 		return err
 	}
 
-	var commands []*exec.Cmd
+	var commands []TfCommand
 
-	commands = append(commands, exec.Command("terraform", "version"))
+	commands = append(commands, TfCommand{Tfcmd: exec.Command("terraform", "version")})
 
 	CopyTfEnv()
 
 	if p.Config.Cacert != "" {
-		commands = append(commands, installCaCert(p.Config.Cacert))
+		commands = append(commands, TfCommand{Tfcmd: installCaCert(p.Config.Cacert)})
 	}
 
-	commands = append(commands, deleteCache())
+	commands = append(commands, TfCommand{Tfcmd: deleteCache()})
 	commands = append(commands, initCommand(p.Config.InitOptions))
 	commands = append(commands, getModules())
 
@@ -102,38 +141,70 @@ func (p Plugin) Exec() error {
 			commands = append(commands, tfPlan(p.Config, true))
 		case "apply":
 			commands = append(commands, tfApply(p.Config))
+		case "show":
+			commands = append(commands, tfShow(p.Config))
 		case "destroy":
 			commands = append(commands, tfDestroy(p.Config))
 		default:
-			return fmt.Errorf("valid actions are: validate, plan, apply, plan-destroy, destroy.  You provided %s", action)
+			return fmt.Errorf("valid actions are: validate, plan, show, apply, plan-destroy, destroy.  You provided %s", action)
 		}
 	}
 
-	commands = append(commands, deleteCache())
+	commands = append(commands, TfCommand{Tfcmd: deleteCache()})
 
 	for _, c := range commands {
-		if c.Dir == "" {
+		if c.Tfcmd.Dir == "" {
 			wd, err := os.Getwd()
 			if err == nil {
-				c.Dir = wd
+				c.Tfcmd.Dir = wd
 			}
 		}
 		if p.Config.RootDir != "" {
-			c.Dir = c.Dir + "/" + p.Config.RootDir
-		}
-		c.Stdout = os.Stdout
-		c.Stderr = os.Stderr
-		if !p.Config.Sensitive {
-			trace(c)
+			c.Tfcmd.Dir = c.Tfcmd.Dir + "/" + p.Config.RootDir
 		}
 
-		err := c.Run()
-		if err != nil {
+		if c.Ofile == "" {
+			c.Tfcmd.Stdout = os.Stdout
+			c.Tfcmd.Stderr = os.Stderr
+			if !p.Config.Sensitive {
+				trace(c.Tfcmd)
+			}
+
+			err := c.Tfcmd.Run()
+			if err != nil {
+				logrus.WithFields(logrus.Fields{
+					"error": err,
+				}).Fatal("Failed to execute a command")
+			}
+		} else {
 			logrus.WithFields(logrus.Fields{
-				"error": err,
-			}).Fatal("Failed to execute a command")
+				"file":    c.Ofile,
+				"command": strings.Join(c.Tfcmd.Args, " "),
+			}).Info("Command")
+
+			out, err := c.Tfcmd.CombinedOutput()
+			if err != nil {
+				logrus.WithFields(logrus.Fields{
+					"command": strings.Join(c.Tfcmd.Args, " "),
+					"error":   err,
+				}).Fatal("Failed to execute a command")
+			}
+			f, outferr := os.Create(c.Ofile)
+			if outferr != nil {
+				logrus.WithFields(logrus.Fields{
+					"command": strings.Join(c.Tfcmd.Args, " "),
+					"error":   outferr,
+				}).Fatal("Failed to write file")
+			}
+			f.Write(out)
+			f.Sync()
+			logrus.WithFields(logrus.Fields{
+				"file":      c.Ofile,
+				"contenets": string(out),
+			}).Info("Logging output")
+			f.Close()
+
 		}
-		logrus.Debug("Command completed successfully")
 	}
 
 	return nil
@@ -180,14 +251,15 @@ func deleteCache() *exec.Cmd {
 	)
 }
 
-func getModules() *exec.Cmd {
-	return exec.Command(
+func getModules() TfCommand {
+	cmd := exec.Command(
 		"terraform",
 		"get",
 	)
+	return (TfCommand{Tfcmd: cmd})
 }
 
-func initCommand(config InitOptions) *exec.Cmd {
+func initCommand(config InitOptions) TfCommand {
 	args := []string{
 		"init",
 	}
@@ -209,10 +281,11 @@ func initCommand(config InitOptions) *exec.Cmd {
 	// Fail Terraform execution on prompt
 	args = append(args, "-input=false")
 
-	return exec.Command(
+	cmd := exec.Command(
 		"terraform",
 		args...,
 	)
+	return (TfCommand{Tfcmd: cmd})
 }
 
 func installCaCert(cacert string) *exec.Cmd {
@@ -226,7 +299,26 @@ func trace(cmd *exec.Cmd) {
 	fmt.Println("$", strings.Join(cmd.Args, " "))
 }
 
-func tfApply(config Config) *exec.Cmd {
+func tfShow(config Config) TfCommand {
+	args := []string{
+		"show",
+		"-no-color",
+	}
+	ofile := config.Difffile
+	if config.Difffile != "" {
+		args = append(args, config.Planfile)
+	}
+
+	cmd := exec.Command(
+		"terraform",
+		args...,
+	)
+
+	return (TfCommand{Tfcmd: cmd, Ofile: ofile})
+
+}
+
+func tfApply(config Config) TfCommand {
 	args := []string{
 		"apply",
 	}
@@ -242,14 +334,19 @@ func tfApply(config Config) *exec.Cmd {
 	if config.InitOptions.LockTimeout != "" {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
-	args = append(args, "plan.tfout")
-	return exec.Command(
+	if config.Planfile != "" {
+		args = append(args, config.Planfile)
+	} else {
+		args = append(args, "plan.tfout")
+	}
+	cmd := exec.Command(
 		"terraform",
 		args...,
 	)
+	return (TfCommand{Tfcmd: cmd})
 }
 
-func tfDestroy(config Config) *exec.Cmd {
+func tfDestroy(config Config) TfCommand {
 	args := []string{
 		"destroy",
 	}
@@ -268,19 +365,27 @@ func tfDestroy(config Config) *exec.Cmd {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
 	args = append(args, "-force")
-	return exec.Command(
+	cmd := exec.Command(
 		"terraform",
 		args...,
 	)
+	return (TfCommand{Tfcmd: cmd})
 }
 
-func tfPlan(config Config, destroy bool) *exec.Cmd {
+func tfPlan(config Config, destroy bool) TfCommand {
 	args := []string{
 		"plan",
 	}
 
+	logrus.WithFields(logrus.Fields{
+		"Config.Parallelism": config.Parallelism,
+		"Config.Planfile":    config.Planfile,
+	}).Info("Configuration")
+
 	if destroy {
 		args = append(args, "-destroy")
+	} else if config.Planfile != "" {
+		args = append(args, fmt.Sprintf("-out=%s", config.Planfile))
 	} else {
 		args = append(args, "-out=plan.tfout")
 	}
@@ -299,13 +404,14 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 	if config.InitOptions.LockTimeout != "" {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
-	return exec.Command(
+	cmd := exec.Command(
 		"terraform",
 		args...,
 	)
+	return (TfCommand{Tfcmd: cmd})
 }
 
-func tfValidate(config Config) *exec.Cmd {
+func tfValidate(config Config) TfCommand {
 	args := []string{
 		"validate",
 	}
@@ -315,10 +421,11 @@ func tfValidate(config Config) *exec.Cmd {
 	for k, v := range config.Vars {
 		args = append(args, "-var", fmt.Sprintf("%s=%s", k, v))
 	}
-	return exec.Command(
+	cmd := exec.Command(
 		"terraform",
 		args...,
 	)
+	return (TfCommand{Tfcmd: cmd})
 }
 
 func vars(vs map[string]string) []string {

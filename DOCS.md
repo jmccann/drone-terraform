@@ -3,17 +3,17 @@ date: 2016-01-01T00:00:00+00:00
 title: Terraform
 author: jmccann
 tags: [ infrastructure, build tool ]
-repo: jmccann/drone-terraform
+repo: quay.io/agari/agari-drone-terraform
 logo: terraform.svg
-image: jmccann/drone-terraform
+image: quay.io/agari/agari-drone-terraform
 ---
 
-The Terraform plugin applies the infrastructure configuration contained within the repository. The below pipeline configuration demonstrates simple usage which will run a `validate`, `plan` and `apply`:
+The Terraform plugin applies the infrastructure configuration contained within the repository. The below pipeline configuration demonstrates simple usage which will run a `validate`, `show`, `plan` and `apply`:
 
 ```yaml
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:5
+    image: quay.io/agari/agari-drone-terraform:5
 ```
 
 Example configuration passing `vars` to terraform commands:
@@ -21,7 +21,7 @@ Example configuration passing `vars` to terraform commands:
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:5
+    image: quay.io/agari/agari-drone-terraform:5
 +   vars:
 +     app_name: my-project
 +     app_version: 1.0.0
@@ -32,10 +32,13 @@ Example of explicitly specifying `actions` to perform a dry run.
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:5
+    image: quay.io/agari/agari-drone-terraform:5
+    planfile: "../planshare.out"
+    difffile: "../diff.out"
 +   actions:
 +     - validate
 +     - plan
++     - show
 ```
 
 Example configuration passing secrets to terraform.  Please read
@@ -47,7 +50,7 @@ for more details.
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:5
+    image: quay.io/agari/agari-drone-terraform:5
 +   secrets:
 +     - source: terraform_secret
 +       target: tf_var_my_secret
@@ -58,12 +61,12 @@ pipeline:
 ```diff
 pipeline:
   terraform_1:
-    image: jmccann/drone-terraform:5
+    image: quay.io/agari/agari-drone-terraform:5
 +   environment:
 +     TF_VAR_MY_SECRET: ${TERRAFORM_SECRET}
 
   terraform_2:
-    image: jmccann/drone-terraform:5
+    image: quay.io/agari/agari-drone-terraform:5
     plan: false
 +   sensitive: true
 +   vars:
@@ -78,7 +81,7 @@ what command is actually being ran.
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:5
+    image: quay.io/agari/agari-drone-terraform:5
 +   sensitive: true
 ```
 
@@ -89,7 +92,7 @@ specified instead of using the embedded version that is included.
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:5
+    image: quay.io/agari/agari-drone-terraform:5
 +   tf_version: 0.10.3
 ```
 
@@ -100,7 +103,7 @@ specified in a `.tf` file.  You can then pass additional options via the `.drone
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:5
+    image: quay.io/agari/agari-drone-terraform:5
 +   init_options:
 +     backend-config:
 +       - "bucket=my-terraform-config-bucket"
@@ -116,7 +119,7 @@ CA Certificate.  You can inject your CA Certificate into the plugin by using
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:5
+    image: quay.io/agari/agari-drone-terraform:5
 +   ca_cert: |
 +     -----BEGIN CERTIFICATE-----
 +     asdfsadf
@@ -133,7 +136,7 @@ See [the discussion](https://github.com/hashicorp/terraform/issues/1275) in the 
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:5
+    image: quay.io/agari/agari-drone-terraform:5
 +   role_arn_to_assume: arn:aws:iam::account-of-role-to-assume:role/name-of-role
 ```
 
@@ -144,7 +147,7 @@ and you want to use different drone configurations to apply different environmen
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:5
+    image: quay.io/agari/agari-drone-terraform:5
 +   root_dir: some/path/here
 ```
 
@@ -155,7 +158,7 @@ all resources will be planned/applied against as the default behavior.
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:5
+    image: quay.io/agari/agari-drone-terraform:5
 +   targets:
 +     - aws_security_group.generic_sg
 +     - aws_security_group.app_sg
@@ -167,20 +170,50 @@ If you want to change Terraform's default parallelism (currently equal to 10) th
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:5
+    image: quay.io/agari/agari-drone-terraform:5
 +   parallelism: 2
 ```
+
+You may want to specify the out directory of the plan file so you can pass it to builds further down the pipeline
+If you want to change Terraform's default outfile (currently plan.tfout in the cwd) then set the `plan_path` parameter.
+
+```diff
+pipeline:
+  terraform:
+    image: quay.io/agari/agari-drone-terraform:5
++   plan_path: /tmp/a.out
+```
+
+Destroying the service can be done by specifying `plan-destroy` and `destroy` actions. Keep in mind that Fastly won't allow a service with active version be destroyed. Use `force_destroy` option in the service definition for terraform to handle it.
 
 Destroying the service can be done by specifying `plan-destroy` and `destroy` actions. Keep in mind that Fastly won't allow a service with active version be destroyed. Use `force_destroy` option in the service definition for terraform to handle it.
 
 ```yaml
 pipeline:
   destroy:
-    image: jmccann/drone-terraform:5
+    image: quay.io/agari/agari-drone-terraform:5
 +   actions:
 +     - plan-destroy
 +     - destroy
 ```
+# Environment variables
+
+- PEM_NAME
+  If this environment variable is set, a file called ~/.ssh/<PEM_NAME> will be created
+
+- PEM_CONTENTS
+  If this environment variable is set, the contents will be put in ~/.ssh/<PEM_NAME>
+  Please be sure to include the "-----BEGIN RSA PRIVATE KEY-----" and end lines for a valid key
+
+- GITHUB_PRIVATE_SSH_KEY
+  If this environment variable is set, ~/.ssh/id_rsa will be set.
+  Please be sure to include the "-----BEGIN RSA PRIVATE KEY-----" and end lines for a valid key
+
+- AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+  If this environment variable is set a ~/.aws/credentials file will be added with the name of the AWS_PROFILE
+
+- AWS_PROFILE (default: `drone-testing`)
+  If a profile is created, it will be set to this name
 
 # Parameter Reference
 
@@ -224,3 +257,9 @@ root_dir
 
 parallelism
 : The number of concurrent operations as Terraform walks its graph.
+
+# Testing Locally
+
+```
+docker run -e PEM_NAME=my.pem -w /root/test -v `pwd`:/root quay.io/agari/agari-drone-terraform 
+```
