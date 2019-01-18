@@ -74,6 +74,11 @@ func main() {
 			EnvVar: "PLUGIN_ROOT_DIR",
 		},
 		cli.StringFlag{
+			Name:   "data_dir",
+			Usage:  "The directory where terraform put's it's data files. When unset, .terraform assumed. (TF_DATA_DIR)",
+			EnvVar: "PLUGIN_DATA_DIR",
+		},
+		cli.StringFlag{
 			Name:   "secrets",
 			Usage:  "a map of secrets to pass to the Terraform `plan` and `apply` commands. Each value is passed as a `<key>=<ENV>` option",
 			EnvVar: "PLUGIN_SECRETS",
@@ -145,6 +150,7 @@ func run(c *cli.Context) error {
 			Sensitive:   c.Bool("sensitive"),
 			RoleARN:     c.String("role_arn_to_assume"),
 			RootDir:     c.String("root_dir"),
+			DataDir:     c.String("data_dir"),
 			Parallelism: c.Int("parallelism"),
 			Targets:     c.StringSlice("targets"),
 			VarFiles:    c.StringSlice("var_files"),

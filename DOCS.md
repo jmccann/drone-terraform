@@ -222,5 +222,7 @@ role_arn_to_assume
 root_dir
 : The root directory where the terraform files live. When unset, the top level directory will be assumed.
 
+data_dir
+: The directory where terraform put's it's data files. When unset, .terraform assumed. (TF_DATA_DIR)
 parallelism
 : The number of concurrent operations as Terraform walks its graph.

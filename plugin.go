@@ -29,6 +29,7 @@ type (
 		Sensitive   bool
 		RoleARN     string
 		RootDir     string
+		DataDir     string
 		Parallelism int
 		Targets     []string
 		VarFiles    []string
@@ -69,6 +70,10 @@ func (p Plugin) Exec() error {
 
 	if p.Config.RoleARN != "" {
 		assumeRole(p.Config.RoleARN)
+	}
+
+	if p.Config.DataDir != "" {
+		os.Setenv("TF_DATA_DIR", p.Config.DataDir)
 	}
 
 	// writing the .netrc file with Github credentials in it.
