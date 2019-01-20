@@ -13,6 +13,18 @@ minor=$(echo $tag | awk -F. '{print $2}')
 
 tf_ver=$(grep TERRAFORM_VERSION Dockerfile | head -n 1 | awk '{print $3}')
 
+echo "Confirm building images for:"
+echo "  MAJOR: ${major}"
+echo "  MINOR: ${minor}"
+echo "  TF_VERSION: ${tf_ver}"
+
+read -p "Proceed? [Y/N] " ans
+
+if [[ "$ans" != "Y" && "$ans" != "y" ]]; then
+  echo "Cancelling"
+  exit 0
+fi
+
 docker build -t jmccann/drone-terraform:latest .
 
 set -x
