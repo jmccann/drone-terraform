@@ -72,6 +72,7 @@ func (p Plugin) Exec() error {
 		assumeRole(p.Config.RoleARN)
 	}
 
+	os.Setenv("TF_DATA_DIR", ".terraform");
 	if p.Config.DataDir != "" {
 		os.Setenv("TF_DATA_DIR", p.Config.DataDir)
 	}
@@ -181,7 +182,7 @@ func deleteCache() *exec.Cmd {
 	return exec.Command(
 		"rm",
 		"-rf",
-		".terraform",
+		os.Getenv("TF_DATA_DIR"),
 	)
 }
 
