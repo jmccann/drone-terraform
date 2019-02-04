@@ -148,4 +148,60 @@ func TestPlugin(t *testing.T) {
 			}
 		})
 	})
+	g.Describe("tfFmt", func() {
+		g.It("Should return correct fmt commands given the arguments", func() {
+			type args struct {
+				config Config
+			}
+
+			affirmative := true
+			negative := false
+
+			tests := []struct {
+				name string
+				args args
+				want *exec.Cmd
+			}{
+				{
+					"default",
+					args{config: Config{}},
+					exec.Command("terraform", "fmt"),
+				},
+				{
+					"with list",
+					args{config: Config{FmtOptions: FmtOptions{List: &affirmative}}},
+					exec.Command("terraform", "fmt", "-list=true"),
+				},
+				{
+					"with write",
+					args{config: Config{FmtOptions: FmtOptions{Write: &affirmative}}},
+					exec.Command("terraform", "fmt", "-write=true"),
+				},
+				{
+					"with diff",
+					args{config: Config{FmtOptions: FmtOptions{Diff: &affirmative}}},
+					exec.Command("terraform", "fmt", "-diff=true"),
+				},
+				{
+					"with check",
+					args{config: Config{FmtOptions: FmtOptions{Check: &affirmative}}},
+					exec.Command("terraform", "fmt", "-check=true"),
+				},
+				{
+					"with combination",
+					args{config: Config{FmtOptions: FmtOptions{
+						List:  &negative,
+						Write: &negative,
+						Diff:  &affirmative,
+						Check: &affirmative,
+					}}},
+					exec.Command("terraform", "fmt", "-list=false", "-write=false", "-diff=true", "-check=true"),
+				},
+			}
+
+			for _, tt := range tests {
+				g.Assert(tfFmt(tt.args.config)).Equal(tt.want)
+			}
+		})
+	})
 }

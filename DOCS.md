@@ -182,11 +182,25 @@ pipeline:
 +     - destroy
 ```
 
+Formatting the Terraform configuration files can be done by specifying the `fmt` action. Use `fmt_options` parameter to handle formatting options.
+
+```yaml
+pipeline:
+  fmt:
+    image: jmccann/drone-terraform:5
++   actions:
++     - fmt
++   fmt_options:
++     write: false
++     diff: true
++     check: true
+```
+
 # Parameter Reference
 
 actions
 : List of terraform actions to perform with the plugin.  List includes:
-`validate`, `plan`, `apply`, `plan-destroy`, `destroy`.
+`fmt`, `validate`, `plan`, `apply`, `plan-destroy`, `destroy`.
 
 init_options
 : contains the configuration for the Terraform backend.
@@ -201,6 +215,21 @@ init_options.lock
 
 init_options.lock-timeout
 : Duration to wait for a state lock. Default `0s`.
+
+fmt_options
+: contains the configuration for the fmt action.
+
+fmt_options.list
+: List files whose formatting differs (disabled if using STDIN). Default `true`.
+
+fmt_options.write
+: Write result to source file instead of STDOUT (disabled if using STDIN or -check). Default `true`.
+
+fmt_options.diff
+: Display diffs of formatting changes. Default `false`.
+
+fmt_options.check
+: Check if the input is formatted. Exit status will be 0 if all input is properly formatted and non-zero otherwise. Default `false`.
 
 vars
 : a map of variables to pass to the Terraform `plan` and `apply` commands.

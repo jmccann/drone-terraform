@@ -43,6 +43,11 @@ func main() {
 			Usage:  "options for the init command. See https://www.terraform.io/docs/commands/init.html",
 			EnvVar: "PLUGIN_INIT_OPTIONS",
 		},
+		cli.StringFlag{
+			Name:   "fmt_options",
+			Usage:  "options for the fmt command. See https://www.terraform.io/docs/commands/fmt.html",
+			EnvVar: "PLUGIN_FMT_OPTIONS",
+		},
 		cli.IntFlag{
 			Name:   "parallelism",
 			Usage:  "The number of concurrent operations as Terraform walks its graph",
@@ -134,6 +139,8 @@ func run(c *cli.Context) error {
 
 	initOptions := InitOptions{}
 	json.Unmarshal([]byte(c.String("init_options")), &initOptions)
+	fmtOptions := FmtOptions{}
+	json.Unmarshal([]byte(c.String("fmt_options")), &fmtOptions)
 
 	plugin := Plugin{
 		Config: Config{
@@ -141,6 +148,7 @@ func run(c *cli.Context) error {
 			Vars:        vars,
 			Secrets:     secrets,
 			InitOptions: initOptions,
+			FmtOptions:  fmtOptions,
 			Cacert:      c.String("ca_cert"),
 			Sensitive:   c.Bool("sensitive"),
 			RoleARN:     c.String("role_arn_to_assume"),

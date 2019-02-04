@@ -25,6 +25,7 @@ type (
 		Vars        map[string]string
 		Secrets     map[string]string
 		InitOptions InitOptions
+		FmtOptions  FmtOptions
 		Cacert      string
 		Sensitive   bool
 		RoleARN     string
@@ -46,6 +47,14 @@ type (
 		BackendConfig []string `json:"backend-config"`
 		Lock          *bool    `json:"lock"`
 		LockTimeout   string   `json:"lock-timeout"`
+	}
+
+	// FmtOptions fmt options for the Terraform's fmt command
+	FmtOptions struct {
+		List  *bool `json:"list"`
+		Write *bool `json:"write"`
+		Diff  *bool `json:"diff"`
+		Check *bool `json:"check"`
 	}
 
 	// Plugin represents the plugin instance to be executed
@@ -94,6 +103,8 @@ func (p Plugin) Exec() error {
 	// Add commands listed from Actions
 	for _, action := range p.Config.Actions {
 		switch action {
+		case "fmt":
+			commands = append(commands, tfFmt(p.Config))
 		case "validate":
 			commands = append(commands, tfValidate(p.Config))
 		case "plan":
@@ -105,7 +116,7 @@ func (p Plugin) Exec() error {
 		case "destroy":
 			commands = append(commands, tfDestroy(p.Config))
 		default:
-			return fmt.Errorf("valid actions are: validate, plan, apply, plan-destroy, destroy.  You provided %s", action)
+			return fmt.Errorf("valid actions are: fmt, validate, plan, apply, plan-destroy, destroy.  You provided %s", action)
 		}
 	}
 
@@ -314,6 +325,28 @@ func tfValidate(config Config) *exec.Cmd {
 	}
 	for k, v := range config.Vars {
 		args = append(args, "-var", fmt.Sprintf("%s=%s", k, v))
+	}
+	return exec.Command(
+		"terraform",
+		args...,
+	)
+}
+
+func tfFmt(config Config) *exec.Cmd {
+	args := []string{
+		"fmt",
+	}
+	if config.FmtOptions.List != nil {
+		args = append(args, fmt.Sprintf("-list=%t", *config.FmtOptions.List))
+	}
+	if config.FmtOptions.Write != nil {
+		args = append(args, fmt.Sprintf("-write=%t", *config.FmtOptions.Write))
+	}
+	if config.FmtOptions.Diff != nil {
+		args = append(args, fmt.Sprintf("-diff=%t", *config.FmtOptions.Diff))
+	}
+	if config.FmtOptions.Check != nil {
+		args = append(args, fmt.Sprintf("-check=%t", *config.FmtOptions.Check))
 	}
 	return exec.Command(
 		"terraform",
