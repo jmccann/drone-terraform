@@ -1,9 +1,10 @@
 # drone-terraform
 
-[![Build Status](http://beta.drone.io/api/badges/jmccann/drone-terraform/status.svg)](http://beta.drone.io/jmccann/drone-terraform)
-
 Drone plugin to execute Terraform plan and apply. For the usage information and
-a listing of the available options please take a look at [the docs](https://github.com/jmccann/drone-terraform/blob/master/DOCS.md).
+a listing of the available options please take a look at [the docs](https://github.com/GetTerminus/drone-terraform/blob/master/DOCS.md).
+
+This fork is intended to be a long term resource, and will not be merged upstream.
+Changes downstream will be accepted. Original documentation can be found [here](https://github.com/jmccann/drone-terraform/blob/master/DOCS.md).
 
 ## Build
 
@@ -21,7 +22,7 @@ go build
 Build the docker image with the following commands:
 
 ```
-docker build --rm=true -t jmccann/drone-terraform .
+docker build --rm=true -t getterminus/drone-terraform .
 ```
 
 ## Usage
@@ -32,7 +33,7 @@ Execute from the working directory:
 docker run --rm \
   -v $(pwd):$(pwd) \
   -w $(pwd) \
-  jmccann/drone-terraform:latest --plan
+  getterminus/drone-terraform:latest --plan
 ```
 
 ## Drone 0.4

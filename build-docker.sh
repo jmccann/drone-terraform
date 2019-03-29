@@ -25,15 +25,15 @@ if [[ "$ans" != "Y" && "$ans" != "y" ]]; then
   exit 0
 fi
 
-docker build -t jmccann/drone-terraform:latest .
+docker build -t getterminus/drone-terraform:latest .
 
 set -x
-docker tag jmccann/drone-terraform:latest jmccann/drone-terraform:${major}
-docker tag jmccann/drone-terraform:latest jmccann/drone-terraform:${major}.${minor}
-docker tag jmccann/drone-terraform:latest jmccann/drone-terraform:${major}.${minor}-${tf_ver}
+docker tag getterminus/drone-terraform:latest getterminus/drone-terraform:${major}
+docker tag getterminus/drone-terraform:latest getterminus/drone-terraform:${major}.${minor}
+docker tag getterminus/drone-terraform:latest getterminus/drone-terraform:${major}.${minor}-${tf_ver}
 
-docker push jmccann/drone-terraform:latest
-docker push jmccann/drone-terraform:${major}
-docker push jmccann/drone-terraform:${major}.${minor}
-docker push jmccann/drone-terraform:${major}.${minor}-${tf_ver}
+docker push getterminus/drone-terraform:latest
+docker push getterminus/drone-terraform:${major}
+docker push getterminus/drone-terraform:${major}.${minor}
+docker push getterminus/drone-terraform:${major}.${minor}-${tf_ver}
 set +x

@@ -1,4 +1,4 @@
-module github.com/jmccann/drone-terraform
+module github.com/GetTerminus/drone-terraform
 
 require (
 	github.com/Sirupsen/logrus v0.0.0-20160829202321-3ec0642a7fb6

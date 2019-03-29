@@ -1,6 +1,6 @@
 # Docker image for the Drone Terraform plugin
 #
-#     docker build -t jmccann/drone-terraform:latest .
+#     docker build -t getterminus/drone-terraform:latest .
 FROM golang:1.11-alpine AS builder
 
 RUN apk add --no-cache git
@@ -15,16 +15,26 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -o /go/bin/dro
 FROM alpine:3.9
 
 RUN apk -U add \
-    ca-certificates \
-    git \
-    wget \
-    openssh-client && \
-    rm -rf /var/cache/apk/*
+  ca-certificates \
+  curl \
+  git \
+  openssh-client && \
+  rm -rf /var/cache/apk/*
 
-ENV TERRAFORM_VERSION 0.11.11
-RUN wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -O terraform.zip && \
-  unzip terraform.zip -d /bin && \
-  rm -f terraform.zip
+ENV INSTALL_DIR /usr/local/bin
 
-COPY --from=builder /go/bin/drone-terraform /bin/
-ENTRYPOINT ["/bin/drone-terraform"]
+ENV TERRAFORM_VERSION 0.11.13
+RUN curl -LO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+  unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d ${INSTALL_DIR} && \
+  rm -f terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+
+ENV AWS_IAM_AUTHENTICATOR_VERSION 1.12.7/2019-03-27
+RUN curl -L -o ${INSTALL_DIR}/aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/${AWS_IAM_AUTHENTICATOR_VERSION}/bin/linux/amd64/aws-iam-authenticator && \
+  chmod +x ${INSTALL_DIR}/aws-iam-authenticator
+
+ENV KUBECTL_VERSION v1.14.0
+RUN curl -L -o ${INSTALL_DIR}/kubectl https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl && \
+  chmod +x ${INSTALL_DIR}/kubectl
+
+COPY --from=builder /go/bin/drone-terraform ${INSTALL_DIR}/
+ENTRYPOINT ["drone-terraform"]
