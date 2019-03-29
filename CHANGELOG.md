@@ -1,4 +1,4 @@
-## 5.2-0.11.13 (2019-03-29)
+## 5.3-0.11.13 (2019-03-29)
 * Forked from https://github.com/jmccann/drone-terraform
 * Install aws-iam-authenticator
 * Install kubectl
