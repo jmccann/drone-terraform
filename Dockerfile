@@ -1,3 +1,4 @@
+
 # Docker image for the Drone Terraform plugin
 #
 #     docker build -t getterminus/drone-terraform:latest .
@@ -14,12 +15,22 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -o /go/bin/dro
 
 FROM alpine:3.9
 
-RUN apk -U add \
+ENV AWSCLI_VERSION "1.16.52"
+
+RUN apk add --update --no-cache \
+    bash \
+    python \
+    python-dev \
+    py-pip \
+    build-base \
+    && pip install awscli==$AWSCLI_VERSION --upgrade --user \
+    && apk --purge -v del py-pip
+
+RUN apk -U --no-cache add \
   ca-certificates \
   curl \
   git \
-  openssh-client && \
-  rm -rf /var/cache/apk/*
+  openssh-client
 
 ENV INSTALL_DIR /usr/local/bin
 
@@ -38,3 +49,4 @@ RUN curl -L -o ${INSTALL_DIR}/kubectl https://storage.googleapis.com/kubernetes-
 
 COPY --from=builder /go/bin/drone-terraform ${INSTALL_DIR}/
 ENTRYPOINT ["drone-terraform"]
+
