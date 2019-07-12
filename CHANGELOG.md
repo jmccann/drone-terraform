@@ -1,3 +1,6 @@
+## 6.0-0.12.4 (2019-07-12)
+* Update embedded TF to `0.12.4`
+
 ## 6.0-0.12.1 (2019-06-05)
 * Version bump plugin to `6.0` since terraform `0.12` has breaking changes
 * Update embedded TF to `0.12.1`
