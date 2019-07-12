@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 tag=$1
 
 if [ -z $tag ]; then
@@ -25,9 +27,9 @@ if [[ "$ans" != "Y" && "$ans" != "y" ]]; then
   exit 0
 fi
 
+set -x
 docker build -t jmccann/drone-terraform:latest .
 
-set -x
 docker tag jmccann/drone-terraform:latest jmccann/drone-terraform:${major}
 docker tag jmccann/drone-terraform:latest jmccann/drone-terraform:${major}.${minor}
 docker tag jmccann/drone-terraform:latest jmccann/drone-terraform:${major}.${minor}-${tf_ver}

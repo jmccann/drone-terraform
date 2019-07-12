@@ -7,9 +7,13 @@ RUN apk add --no-cache git
 
 RUN mkdir -p /tmp/drone-terraform
 WORKDIR /tmp/drone-terraform
+
+COPY go.mod go.mod
+COPY go.sum go.sum
+RUN go mod download
+
 COPY . .
 
-RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -o /go/bin/drone-terraform
 
 FROM alpine:3.9
