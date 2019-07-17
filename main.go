@@ -108,6 +108,11 @@ func main() {
 			Usage:  "a list of var files to use. Each value is passed as -var-file=<value>",
 			EnvVar: "PLUGIN_VAR_FILES",
 		},
+		cli.StringSliceFlag{
+			Name:   "tf_data_dir",
+			Usage:  "changes the location where Terraform keeps its per-working-directory data, such as the current remote backend configuration.",
+			EnvVar: "PLUGIN_TF_DATA_DIR",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -144,18 +149,19 @@ func run(c *cli.Context) error {
 
 	plugin := Plugin{
 		Config: Config{
-			Actions:     c.StringSlice("actions"),
-			Vars:        vars,
-			Secrets:     secrets,
-			InitOptions: initOptions,
-			FmtOptions:  fmtOptions,
-			Cacert:      c.String("ca_cert"),
-			Sensitive:   c.Bool("sensitive"),
-			RoleARN:     c.String("role_arn_to_assume"),
-			RootDir:     c.String("root_dir"),
-			Parallelism: c.Int("parallelism"),
-			Targets:     c.StringSlice("targets"),
-			VarFiles:    c.StringSlice("var_files"),
+			Actions:          c.StringSlice("actions"),
+			Vars:             vars,
+			Secrets:          secrets,
+			InitOptions:      initOptions,
+			FmtOptions:       fmtOptions,
+			Cacert:           c.String("ca_cert"),
+			Sensitive:        c.Bool("sensitive"),
+			RoleARN:          c.String("role_arn_to_assume"),
+			RootDir:          c.String("root_dir"),
+			Parallelism:      c.Int("parallelism"),
+			Targets:          c.StringSlice("targets"),
+			VarFiles:         c.StringSlice("var_files"),
+			TerraformDataDir: c.String("tf_data_dir"),
 		},
 		Netrc: Netrc{
 			Login:    c.String("netrc.username"),

@@ -204,4 +204,59 @@ func TestPlugin(t *testing.T) {
 			}
 		})
 	})
+
+	g.Describe("tfDataDir", func() {
+		g.It("Should override the terraform data dir environment variable when provided", func() {
+			type args struct {
+				config Config
+			}
+
+			tests := []struct {
+				name            string
+				args            args
+				want            *exec.Cmd
+				expectedEnvVars []string
+			}{
+				{
+					"with TerraformDataDir",
+					args{config: Config{TerraformDataDir: ".overriden_terraform_dir"}},
+					exec.Command("terraform", "apply", ".overriden_terraform_dir.plan.tfout"),
+					[]string{"TF_DATA_DIR=.overriden_terraform_dir"},
+				},
+				{
+					"with TerraformDataDir value as .terraform",
+					args{config: Config{TerraformDataDir: ".terraform"}},
+					exec.Command("terraform", "apply", "plan.tfout"),
+					[]string{},
+				},
+				{
+					"without TerraformDataDir",
+					args{config: Config{}},
+					exec.Command("terraform", "apply", "plan.tfout"),
+					[]string{},
+				},
+			}
+
+			for _, tt := range tests {
+				applied := tfApply(tt.args.config)
+				appliedEnv := applied.Env
+				applied.Env = nil
+
+				g.Assert(applied).Equal(tt.want)
+
+				var found int = 0
+
+				for _, expectedEnvVar := range tt.expectedEnvVars {
+					for _, env := range appliedEnv {
+						if expectedEnvVar == env {
+							found += 1
+							break
+						}
+					}
+				}
+				g.Assert(found).Equal(len(tt.expectedEnvVars))
+
+			}
+		})
+	})
 }
