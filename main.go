@@ -108,7 +108,7 @@ func main() {
 			Usage:  "a list of var files to use. Each value is passed as -var-file=<value>",
 			EnvVar: "PLUGIN_VAR_FILES",
 		},
-		cli.StringSliceFlag{
+		cli.StringFlag{
 			Name:   "tf_data_dir",
 			Usage:  "changes the location where Terraform keeps its per-working-directory data, such as the current remote backend configuration.",
 			EnvVar: "PLUGIN_TF_DATA_DIR",
