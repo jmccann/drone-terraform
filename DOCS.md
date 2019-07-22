@@ -196,6 +196,19 @@ pipeline:
 +     check: true
 ```
 
+You may want to run some executions in parallel without having racing condition problems with the .terraform dir and 
+plan's output file.
+
+```diff
+pipeline:
+  backend-service:
+    image: jmccann/drone-terraform:<version>
++   tf_data_dir: .backend-service.terraform
+  frontend-service:
+    image: jmccann/drone-terraform:<version>
++   tf_data_dir: .frontend-service.terraform
+```
+
 # Parameter Reference
 
 actions
@@ -253,3 +266,6 @@ root_dir
 
 parallelism
 : The number of concurrent operations as Terraform walks its graph.
+
+tf_data_dir
+: changes the location where Terraform keeps its per-working-directory data, such as the current remote backend configuration.
