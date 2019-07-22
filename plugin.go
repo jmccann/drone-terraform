@@ -382,7 +382,10 @@ func createEnvironmentVariables(config Config) []string {
 
 func createTerraformCommand(config Config, args ...string) *exec.Cmd {
 	command := exec.Command("terraform", args...)
-	command.Env = append(command.Env, createEnvironmentVariables(config)...)
+	environmentVariables := createEnvironmentVariables(config)
+	if len(environmentVariables) > 0 {
+		command.Env = append(os.Environ(), environmentVariables...)
+	}
 	return command
 }
 func getTfoutPath(config Config) string {
