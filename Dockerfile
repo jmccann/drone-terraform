@@ -19,13 +19,13 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -o /go/bin/dro
 FROM alpine:3.9
 
 RUN apk -U add \
-    ca-certificates \
-    git \
-    wget \
-    openssh-client && \
-    rm -rf /var/cache/apk/*
+  ca-certificates \
+  git \
+  wget \
+  openssh-client && \
+  rm -rf /var/cache/apk/*
 
-ENV TERRAFORM_VERSION 0.12.4
+ENV TERRAFORM_VERSION 0.12.5
 RUN wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -O terraform.zip && \
   unzip terraform.zip -d /bin && \
   rm -f terraform.zip
