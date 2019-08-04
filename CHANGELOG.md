@@ -1,3 +1,6 @@
+## 6.0-0.12.6 (2019-08-04)
+* Update embedded TF to `0.12.6`
+
 ## 6.0-0.12.4 (2019-07-12)
 * Update embedded TF to `0.12.4`
 
