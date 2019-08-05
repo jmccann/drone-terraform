@@ -173,7 +173,7 @@ pipeline:
 
 Destroying the service can be done by specifying `plan-destroy` and `destroy` actions. Keep in mind that Fastly won't allow a service with active version be destroyed. Use `force_destroy` option in the service definition for terraform to handle it.
 
-```yaml
+```diff
 pipeline:
   destroy:
     image: jmccann/drone-terraform:5
@@ -184,7 +184,7 @@ pipeline:
 
 Formatting the Terraform configuration files can be done by specifying the `fmt` action. Use `fmt_options` parameter to handle formatting options.
 
-```yaml
+```diff
 pipeline:
   fmt:
     image: jmccann/drone-terraform:5
