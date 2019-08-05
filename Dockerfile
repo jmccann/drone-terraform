@@ -25,8 +25,8 @@ RUN apk -U add \
     openssh-client && \
     rm -rf /var/cache/apk/*
 
-ENV TERRAFORM_VERSION 0.12.4
-RUN wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -O terraform.zip && \
+ARG terraform_version
+RUN wget -q https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_linux_amd64.zip -O terraform.zip && \
   unzip terraform.zip -d /bin && \
   rm -f terraform.zip
 

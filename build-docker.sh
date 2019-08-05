@@ -13,7 +13,7 @@ major=$(echo $tag | awk -F. '{print $1}')
 minor=$(echo $tag | awk -F. '{print $2}')
 # patch=$(echo $tag | awk -F. '{print $3}')
 
-tf_ver=$(grep TERRAFORM_VERSION Dockerfile | head -n 1 | awk '{print $3}')
+tf_ver="0.12.4"
 
 echo "Confirm building images for:"
 echo "  MAJOR: ${major}"
@@ -28,7 +28,7 @@ if [[ "$ans" != "Y" && "$ans" != "y" ]]; then
 fi
 
 set -x
-docker build -t jmccann/drone-terraform:latest .
+docker build -t jmccann/drone-terraform:latest --build-arg terraform_version=${tf_ver} .
 
 docker tag jmccann/drone-terraform:latest jmccann/drone-terraform:${major}
 docker tag jmccann/drone-terraform:latest jmccann/drone-terraform:${major}.${minor}
