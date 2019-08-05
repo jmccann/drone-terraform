@@ -21,7 +21,9 @@ go build
 Build the docker image with the following commands:
 
 ```
-docker build --rm=true -t jmccann/drone-terraform .
+docker build --rm=true \
+  -t jmccann/drone-terraform \
+  --build-arg terraform_version=0.12.0 .
 ```
 
 ## Usage
