@@ -87,6 +87,12 @@ func (p Plugin) Exec() error {
 		return err
 	}
 
+	var terraformDataDir string = ".terraform"
+	if p.Config.TerraformDataDir != "" {
+		terraformDataDir = p.Config.TerraformDataDir
+		os.Setenv("TF_DATA_DIR", p.Config.TerraformDataDir)
+	}
+
 	var commands []*exec.Cmd
 
 	commands = append(commands, exec.Command("terraform", "version"))
@@ -97,8 +103,8 @@ func (p Plugin) Exec() error {
 		commands = append(commands, installCaCert(p.Config.Cacert))
 	}
 
-	commands = append(commands, deleteCache(p.Config))
-	commands = append(commands, initCommand(p.Config))
+	commands = append(commands, deleteCache(terraformDataDir))
+	commands = append(commands, initCommand(p.Config.InitOptions))
 	commands = append(commands, getModules())
 
 	// Add commands listed from Actions
@@ -121,7 +127,7 @@ func (p Plugin) Exec() error {
 		}
 	}
 
-	commands = append(commands, deleteCache(p.Config))
+	commands = append(commands, deleteCache(terraformDataDir))
 
 	for _, c := range commands {
 		if c.Dir == "" {
@@ -184,8 +190,7 @@ func assumeRole(roleArn string) {
 	os.Setenv("AWS_SESSION_TOKEN", value.SessionToken)
 }
 
-func deleteCache(config Config) *exec.Cmd {
-	terraformDataDir := getTerraformDataDir(config)
+func deleteCache(terraformDataDir string) *exec.Cmd {
 	return exec.Command(
 		"rm",
 		"-rf",
@@ -200,30 +205,30 @@ func getModules() *exec.Cmd {
 	)
 }
 
-func initCommand(config Config) *exec.Cmd {
+func initCommand(config InitOptions) *exec.Cmd {
 	args := []string{
 		"init",
 	}
 
-	for _, v := range config.InitOptions.BackendConfig {
+	for _, v := range config.BackendConfig {
 		args = append(args, fmt.Sprintf("-backend-config=%s", v))
 	}
 
 	// True is default in TF
-	if config.InitOptions.Lock != nil {
-		args = append(args, fmt.Sprintf("-lock=%t", *config.InitOptions.Lock))
+	if config.Lock != nil {
+		args = append(args, fmt.Sprintf("-lock=%t", *config.Lock))
 	}
 
 	// "0s" is default in TF
-	if config.InitOptions.LockTimeout != "" {
-		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
+	if config.LockTimeout != "" {
+		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.LockTimeout))
 	}
 
 	// Fail Terraform execution on prompt
 	args = append(args, "-input=false")
 
-	return createTerraformCommand(
-		config,
+	return exec.Command(
+		"terraform",
 		args...,
 	)
 }
@@ -255,10 +260,10 @@ func tfApply(config Config) *exec.Cmd {
 	if config.InitOptions.LockTimeout != "" {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
-	args = append(args, getTfoutPath(config))
+	args = append(args, getTfoutPath())
 
-	return createTerraformCommand(
-		config,
+	return exec.Command(
+		"terraform",
 		args...,
 	)
 }
@@ -282,8 +287,8 @@ func tfDestroy(config Config) *exec.Cmd {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
 	args = append(args, "-force")
-	return createTerraformCommand(
-		config,
+	return exec.Command(
+		"terraform",
 		args...,
 	)
 }
@@ -296,7 +301,7 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 	if destroy {
 		args = append(args, "-destroy")
 	} else {
-		args = append(args, fmt.Sprintf("-out=%s", getTfoutPath(config)))
+		args = append(args, fmt.Sprintf("-out=%s", getTfoutPath()))
 	}
 
 	for _, v := range config.Targets {
@@ -313,8 +318,8 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 	if config.InitOptions.LockTimeout != "" {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
-	return createTerraformCommand(
-		config,
+	return exec.Command(
+		"terraform",
 		args...,
 	)
 }
@@ -329,8 +334,8 @@ func tfValidate(config Config) *exec.Cmd {
 	for k, v := range config.Vars {
 		args = append(args, "-var", fmt.Sprintf("%s=%s", k, v))
 	}
-	return createTerraformCommand(
-		config,
+	return exec.Command(
+		"terraform",
 		args...,
 	)
 }
@@ -351,46 +356,15 @@ func tfFmt(config Config) *exec.Cmd {
 	if config.FmtOptions.Check != nil {
 		args = append(args, fmt.Sprintf("-check=%t", *config.FmtOptions.Check))
 	}
-	return createTerraformCommand(
-		config,
+	return exec.Command(
+		"terraform",
 		args...,
 	)
 }
 
-func getTerraformDataDir(config Config) string {
-	// Override terraform data dir
-	var terraformDataDir string
-	if config.TerraformDataDir != "" {
-		terraformDataDir = config.TerraformDataDir
-	} else if os.Getenv("TF_DATA_DIR") != "" {
-		terraformDataDir = os.Getenv("TF_DATA_DIR")
-	} else {
-		terraformDataDir = ".terraform"
-	}
-	return terraformDataDir
-}
-
-func createEnvironmentVariables(config Config) []string {
-	var environmentVariables []string = []string{}
-
-	terraformDataDir := getTerraformDataDir(config)
-	if terraformDataDir != ".terraform" {
-		environmentVariables = append(environmentVariables, fmt.Sprintf("TF_DATA_DIR=%s", terraformDataDir))
-	}
-	return environmentVariables
-}
-
-func createTerraformCommand(config Config, args ...string) *exec.Cmd {
-	command := exec.Command("terraform", args...)
-	environmentVariables := createEnvironmentVariables(config)
-	if len(environmentVariables) > 0 {
-		command.Env = append(os.Environ(), environmentVariables...)
-	}
-	return command
-}
-func getTfoutPath(config Config) string {
-	terraformDataDir := getTerraformDataDir(config)
-	if terraformDataDir == ".terraform" {
+func getTfoutPath() string {
+	terraformDataDir := os.Getenv("TF_DATA_DIR")
+	if terraformDataDir == ".terraform" || terraformDataDir == "" {
 		return "plan.tfout"
 	} else {
 		return fmt.Sprintf("%s.plan.tfout", terraformDataDir)
