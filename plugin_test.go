@@ -204,4 +204,42 @@ func TestPlugin(t *testing.T) {
 			}
 		})
 	})
+
+	g.Describe("tfDataDir", func() {
+		g.It("Should override the terraform data dir environment variable when provided", func() {
+			type args struct {
+				config Config
+			}
+
+			tests := []struct {
+				name string
+				args args
+				want *exec.Cmd
+			}{
+				{
+					"with TerraformDataDir",
+					args{config: Config{TerraformDataDir: ".overriden_terraform_dir"}},
+					exec.Command("terraform", "apply", ".overriden_terraform_dir.plan.tfout"),
+				},
+				{
+					"with TerraformDataDir value as .terraform",
+					args{config: Config{TerraformDataDir: ".terraform"}},
+					exec.Command("terraform", "apply", "plan.tfout"),
+				},
+				{
+					"without TerraformDataDir",
+					args{config: Config{}},
+					exec.Command("terraform", "apply", "plan.tfout"),
+				},
+			}
+
+			for _, tt := range tests {
+				os.Setenv("TF_DATA_DIR", tt.args.config.TerraformDataDir)
+				applied := tfApply(tt.args.config)
+
+				g.Assert(applied).Equal(tt.want)
+
+			}
+		})
+	})
 }
