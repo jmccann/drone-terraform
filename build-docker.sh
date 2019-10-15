@@ -13,7 +13,7 @@ major=$(echo $tag | awk -F. '{print $1}')
 minor=$(echo $tag | awk -F. '{print $2}')
 # patch=$(echo $tag | awk -F. '{print $3}')
 
-tf_ver="0.12.8"
+tf_ver="0.12.10"
 
 echo "Confirm building images for:"
 echo "  MAJOR: ${major}"

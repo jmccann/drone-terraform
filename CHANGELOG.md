@@ -1,3 +1,6 @@
+## 6.1-0.12.10 (2019-10-15)
+* Update embedded TF to `0.12.10`
+
 ## 6.1-0.12.8 (2019-09-06)
 * Support for parallel execution (https://github.com/jmccann/drone-terraform/pull/94).  Thanks @caioquirino!
 * Updated golang to 1.13
