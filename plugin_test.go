@@ -104,6 +104,24 @@ func TestPlugin(t *testing.T) {
 			}
 		})
 	})
+	
+	g.Describe("tfValidate", func() {
+		g.It("Should return correct validate command", func() {
+			tests := []struct {
+				name string
+				want *exec.Cmd
+			}{
+				{
+					"default",
+					exec.Command("terraform", "validate"),
+				}
+			}
+
+			for _, tt := range tests {
+				g.Assert(tfValidate()).Equal(tt.want)
+			}
+		})
+	})
 
 	g.Describe("tfPlan", func() {
 		g.It("Should return correct plan commands given the arguments", func() {
