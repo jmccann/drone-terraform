@@ -324,15 +324,9 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 	)
 }
 
-func tfValidate(config Config) *exec.Cmd {
+func tfValidate() *exec.Cmd {
 	args := []string{
 		"validate",
-	}
-	for _, v := range config.VarFiles {
-		args = append(args, fmt.Sprintf("-var-file=%s", v))
-	}
-	for k, v := range config.Vars {
-		args = append(args, "-var", fmt.Sprintf("%s=%s", k, v))
 	}
 	return exec.Command(
 		"terraform",
