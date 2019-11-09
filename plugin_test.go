@@ -114,7 +114,7 @@ func TestPlugin(t *testing.T) {
 				{
 					"default",
 					exec.Command("terraform", "validate"),
-				}
+				},
 			}
 
 			for _, tt := range tests {
