@@ -113,7 +113,7 @@ func (p Plugin) Exec() error {
 		case "fmt":
 			commands = append(commands, tfFmt(p.Config))
 		case "validate":
-			commands = append(commands, tfValidate(p.Config))
+			commands = append(commands, tfValidate())
 		case "plan":
 			commands = append(commands, tfPlan(p.Config, false))
 		case "plan-destroy":
