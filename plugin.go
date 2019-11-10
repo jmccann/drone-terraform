@@ -325,12 +325,9 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 }
 
 func tfValidate() *exec.Cmd {
-	args := []string{
-		"validate",
-	}
 	return exec.Command(
 		"terraform",
-		args...,
+		"validate",
 	)
 }
 
