@@ -107,12 +107,28 @@ func TestPlugin(t *testing.T) {
 	
 	g.Describe("tfValidate", func() {
 		g.It("Should return correct validate command", func() {
+			type args struct {
+				config Config
+			}
+
 			tests := []struct {
 				name string
+				args args
 				want *exec.Cmd
 			}{
 				{
 					"default",
+					args{config: Config{VarFiles: []string{"common.tfvars", "prod.tfvars"}}},
+					exec.Command("terraform", "validate"),
+				},
+				{
+					"with no vars",
+					args{config: Config{Vars: map[string]string{"var1": "value1", "var2": "value2"}}},
+					exec.Command("terraform", "validate"),
+				},
+				{
+					"with no var-files",
+					args{config: Config{VarFiles: []string{"common.tfvars", "prod.tfvars"}}},
 					exec.Command("terraform", "validate"),
 				},
 			}
