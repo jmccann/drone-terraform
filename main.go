@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/joho/godotenv"
 	"github.com/urfave/cli"
 )
 
@@ -35,8 +34,9 @@ func main() {
 			EnvVar: "PLUGIN_CA_CERT",
 		},
 		cli.StringFlag{
-			Name:  "env-file",
-			Usage: "source env file",
+			Name:   "env_file",
+			Usage:  "pass filename to source it and load variables into current shell",
+			EnvVar: "PLUGIN_ENV_FILE",
 		},
 		cli.StringFlag{
 			Name:   "init_options",
@@ -125,10 +125,6 @@ func run(c *cli.Context) error {
 		"Revision": revision,
 	}).Info("Drone Terraform Plugin Version")
 
-	if c.String("env-file") != "" {
-		_ = godotenv.Load(c.String("env-file"))
-	}
-
 	var vars map[string]string
 	if c.String("vars") != "" {
 		if err := json.Unmarshal([]byte(c.String("vars")), &vars); err != nil {
@@ -161,6 +157,7 @@ func run(c *cli.Context) error {
 			Parallelism:      c.Int("parallelism"),
 			Targets:          c.StringSlice("targets"),
 			VarFiles:         c.StringSlice("var_files"),
+			EnvFile:          c.String("env_file"),
 			TerraformDataDir: c.String("tf_data_dir"),
 		},
 		Netrc: Netrc{

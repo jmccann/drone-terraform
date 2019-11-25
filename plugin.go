@@ -16,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/joho/godotenv"
 )
 
 type (
@@ -33,6 +34,7 @@ type (
 		Parallelism      int
 		Targets          []string
 		VarFiles         []string
+		EnvFile          string
 		TerraformDataDir string
 	}
 
@@ -75,6 +77,10 @@ func (p Plugin) Exec() error {
 		if err != nil {
 			return err
 		}
+	}
+
+	if p.Config.EnvFile != "" {
+		_ = godotenv.Load(p.Config.EnvFile)
 	}
 
 	if p.Config.RoleARN != "" {
@@ -169,7 +175,14 @@ func CopyTfEnv() {
 	}
 }
 
-func assumeRole(roleArn string) {
+func assumeRole(roleArn string) bool {
+	awsTokens := []string{"AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"}
+	for _, token := range awsTokens {
+		if os.Getenv(token) != "" {
+			return true
+		}
+	}
+
 	client := sts.New(session.New())
 	duration := time.Hour * 1
 	stsProvider := &stscreds.AssumeRoleProvider{
@@ -188,6 +201,8 @@ func assumeRole(roleArn string) {
 	os.Setenv("AWS_ACCESS_KEY_ID", value.AccessKeyID)
 	os.Setenv("AWS_SECRET_ACCESS_KEY", value.SecretAccessKey)
 	os.Setenv("AWS_SESSION_TOKEN", value.SessionToken)
+
+	return true
 }
 
 func deleteCache(terraformDataDir string) *exec.Cmd {
