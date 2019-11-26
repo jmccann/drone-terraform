@@ -104,7 +104,7 @@ func TestPlugin(t *testing.T) {
 			}
 		})
 	})
-	
+
 	g.Describe("tfValidate", func() {
 		g.It("Should return correct validate command", func() {
 			tests := []struct {
