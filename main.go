@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/joho/godotenv"
 	"github.com/urfave/cli"
 )
 
@@ -125,6 +126,10 @@ func run(c *cli.Context) error {
 		"Revision": revision,
 	}).Info("Drone Terraform Plugin Version")
 
+	if c.String("env_file") != "" {
+		_ = godotenv.Load(c.String("env_file"))
+	}
+
 	var vars map[string]string
 	if c.String("vars") != "" {
 		if err := json.Unmarshal([]byte(c.String("vars")), &vars); err != nil {
@@ -157,7 +162,6 @@ func run(c *cli.Context) error {
 			Parallelism:      c.Int("parallelism"),
 			Targets:          c.StringSlice("targets"),
 			VarFiles:         c.StringSlice("var_files"),
-			EnvFile:          c.String("env_file"),
 			TerraformDataDir: c.String("tf_data_dir"),
 		},
 		Netrc: Netrc{
