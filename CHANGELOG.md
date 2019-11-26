@@ -1,6 +1,3 @@
-## 6.1-0.12.11 (2019-11-10)
-* Remove var and var-file args from validate operation
-
 ## 6.1-0.12.11 (2019-10-18)
 * Update embedded TF to `0.12.11`
 
