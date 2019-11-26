@@ -16,7 +16,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/joho/godotenv"
 )
 
 type (
@@ -34,7 +33,6 @@ type (
 		Parallelism      int
 		Targets          []string
 		VarFiles         []string
-		EnvFile          string
 		TerraformDataDir string
 	}
 
@@ -77,10 +75,6 @@ func (p Plugin) Exec() error {
 		if err != nil {
 			return err
 		}
-	}
-
-	if p.Config.EnvFile != "" {
-		_ = godotenv.Load(p.Config.EnvFile)
 	}
 
 	if p.Config.RoleARN != "" {
