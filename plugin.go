@@ -87,7 +87,7 @@ func (p Plugin) Exec() error {
 		return err
 	}
 
-	var terraformDataDir string = ".terraform"
+	terraformDataDir := ".terraform"
 	if p.Config.TerraformDataDir != "" {
 		terraformDataDir = p.Config.TerraformDataDir
 		os.Setenv("TF_DATA_DIR", p.Config.TerraformDataDir)
