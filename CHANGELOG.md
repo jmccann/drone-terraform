@@ -1,3 +1,9 @@
+## 6.2-0.12.16 (2019-11-26)
+* Update embedded TF to `0.12.16`
+
+## 6.2-0.12.11 (2019-11-26)
+* tfValidate vars and var-file argument removal #106 Thanks @gsingh1
+
 ## 6.1-0.12.11 (2019-10-18)
 * Update embedded TF to `0.12.11`
 
