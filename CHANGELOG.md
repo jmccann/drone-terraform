@@ -1,8 +1,3 @@
-## 6.2-0.12.11 (2019-11-25)
-**BREAKING CHANGE**
-* Changed `env-file` param to `env_file` to make it consistent with other parameters
-* Added `env_file` param to the plugin config
-
 ## 6.1-0.12.11 (2019-10-18)
 * Update embedded TF to `0.12.11`
 
