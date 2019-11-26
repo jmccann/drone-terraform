@@ -77,7 +77,7 @@ func (p Plugin) Exec() error {
 		}
 	}
 
-	if p.Config.RoleARN != "" {
+	if p.Config.RoleARN != "" && !credsSet() {
 		assumeRole(p.Config.RoleARN)
 	}
 
@@ -169,14 +169,17 @@ func CopyTfEnv() {
 	}
 }
 
-func assumeRole(roleArn string) bool {
+func credsSet() bool {
 	awsTokens := []string{"AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"}
 	for _, token := range awsTokens {
 		if os.Getenv(token) != "" {
 			return true
 		}
 	}
+	return false
+}
 
+func assumeRole(roleArn string) {
 	client := sts.New(session.New())
 	duration := time.Hour * 1
 	stsProvider := &stscreds.AssumeRoleProvider{
@@ -195,8 +198,6 @@ func assumeRole(roleArn string) bool {
 	os.Setenv("AWS_ACCESS_KEY_ID", value.AccessKeyID)
 	os.Setenv("AWS_SECRET_ACCESS_KEY", value.SecretAccessKey)
 	os.Setenv("AWS_SESSION_TOKEN", value.SessionToken)
-
-	return true
 }
 
 func deleteCache(terraformDataDir string) *exec.Cmd {
