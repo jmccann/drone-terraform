@@ -357,9 +357,9 @@ func getTfoutPath() string {
 	terraformDataDir := os.Getenv("TF_DATA_DIR")
 	if terraformDataDir == ".terraform" || terraformDataDir == "" {
 		return "plan.tfout"
-	} else {
-		return fmt.Sprintf("%s.plan.tfout", terraformDataDir)
 	}
+
+	return fmt.Sprintf("%s.plan.tfout", terraformDataDir)
 }
 
 func vars(vs map[string]string) []string {
