@@ -172,11 +172,11 @@ func CopyTfEnv() {
 func credsSet() bool {
 	awsTokens := []string{"AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"}
 	for _, token := range awsTokens {
-		if os.Getenv(token) != "" {
-			return true
+		if os.Getenv(token) == "" {
+			return false
 		}
 	}
-	return false
+	return true
 }
 
 func assumeRole(roleArn string) {
