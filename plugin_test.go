@@ -1,12 +1,26 @@
 package main
 
 import (
+	"log"
 	"os"
 	"os/exec"
 	"testing"
 
 	. "github.com/franela/goblin"
+	"github.com/joho/godotenv"
 )
+
+func loadEnv(keyValue string) {
+	const FileName = "./.env_example"
+	env, err := godotenv.Unmarshal(keyValue)
+	err = godotenv.Write(env, FileName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(FileName)
+
+	_ = godotenv.Load(FileName)
+}
 
 func TestPlugin(t *testing.T) {
 	g := Goblin(t)
@@ -25,6 +39,63 @@ func TestPlugin(t *testing.T) {
 			g.Assert(os.Getenv("TF_VAR_something_else")).Equal("some other value")
 			g.Assert(os.Getenv("TF_VAR_base64")).Equal("dGVzdA==")
 		})
+	})
+
+	g.Describe("credsSet", func() {
+		var awsAccessKeyID string
+		var awsSecretAccessKey string
+		var awsSessionToken string
+
+		g.Before(func() {
+			awsAccessKeyID = os.Getenv("AWS_ACCESS_KEY_ID")
+			awsSecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
+			awsSessionToken = os.Getenv("AWS_SESSION_TOKEN")
+		})
+
+		// Restoring all credentials after running the credsSet test
+		g.After(func() {
+			os.Setenv("AWS_ACCESS_KEY_ID", awsAccessKeyID)
+			os.Setenv("AWS_SECRET_ACCESS_KEY", awsSecretAccessKey)
+			os.Setenv("AWS_SESSION_TOKEN", awsSessionToken)
+		})
+
+		type args struct {
+			config string
+		}
+
+		tests := []struct {
+			name string
+			args args
+			want bool
+		}{
+			{
+				"Should return true when all credentials were set",
+				args{config: "AWS_ACCESS_KEY_ID=access_key_id1\nAWS_SECRET_ACCESS_KEY=secret_access_key1\nAWS_SESSION_TOKEN=session_token1"},
+				true,
+			},
+			{
+				"Should return false when access key id is missing",
+				args{config: "AWS_SECRET_ACCESS_KEY=secret_access_key2\nAWS_SESSION_TOKEN=session_token2"},
+				false,
+			},
+			{
+				"Should return false when secret access key is missing",
+				args{config: "AWS_ACCESS_KEY_ID=access_key_id3\nAWS_SESSION_TOKEN=session_token3"},
+				false,
+			},
+			{
+				"Should return false when session token is missing",
+				args{config: "AWS_ACCESS_KEY_ID=access_key_id4\nAWS_SECRET_ACCESS_KEY=secret_access_key4"},
+				false,
+			},
+		}
+
+		for _, tt := range tests {
+			g.It(tt.name, func() {
+				loadEnv(tt.args.config)
+				g.Assert(credsSet()).Equal(tt.want)
+			})
+		}
 	})
 
 	g.Describe("tfApply", func() {
