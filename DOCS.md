@@ -8,13 +8,12 @@ logo: terraform.svg
 image: jmccann/drone-terraform
 ---
 
-The Terraform plugin applies the infrastructure configuration contained within the repository. The below pipeline configuration demonstrates simple usage:
+The Terraform plugin applies the infrastructure configuration contained within the repository. The below pipeline configuration demonstrates simple usage which will run a `validate`, `plan` and `apply`:
 
 ```yaml
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:1
-    plan: false
+    image: jmccann/drone-terraform:5
 ```
 
 Example configuration passing `vars` to terraform commands:
@@ -22,11 +21,21 @@ Example configuration passing `vars` to terraform commands:
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:1
-    plan: false
+    image: jmccann/drone-terraform:5
 +   vars:
 +     app_name: my-project
 +     app_version: 1.0.0
+```
+
+Example of explicitly specifying `actions` to perform a dry run.
+
+```diff
+pipeline:
+  terraform:
+    image: jmccann/drone-terraform:5
++   actions:
++     - validate
++     - plan
 ```
 
 Example configuration passing secrets to terraform.  Please read
@@ -38,8 +47,7 @@ for more details.
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:1
-    plan: false
+    image: jmccann/drone-terraform:5
 +   secrets:
 +     - source: terraform_secret
 +       target: tf_var_my_secret
@@ -50,13 +58,12 @@ pipeline:
 ```diff
 pipeline:
   terraform_1:
-    image: jmccann/drone-terraform:1
-    plan: false
+    image: jmccann/drone-terraform:5
 +   environment:
 +     TF_VAR_MY_SECRET: ${TERRAFORM_SECRET}
 
   terraform_2:
-    image: jmccann/drone-terraform:1
+    image: jmccann/drone-terraform:5
     plan: false
 +   sensitive: true
 +   vars:
@@ -71,8 +78,7 @@ what command is actually being ran.
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:1
-    plan: false
+    image: jmccann/drone-terraform:5
 +   sensitive: true
 ```
 
@@ -83,8 +89,7 @@ specified instead of using the embedded version that is included.
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:1
-    plan: false
+    image: jmccann/drone-terraform:5
 +   tf_version: 0.10.3
 ```
 
@@ -95,8 +100,7 @@ specified in a `.tf` file.  You can then pass additional options via the `.drone
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:1
-    plan: false
+    image: jmccann/drone-terraform:5
 +   init_options:
 +     backend-config:
 +       - "bucket=my-terraform-config-bucket"
@@ -112,8 +116,7 @@ CA Certificate.  You can inject your CA Certificate into the plugin by using
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:1
-    plan: false
+    image: jmccann/drone-terraform:5
 +   ca_cert: |
 +     -----BEGIN CERTIFICATE-----
 +     asdfsadf
@@ -130,8 +133,7 @@ See [the discussion](https://github.com/hashicorp/terraform/issues/1275) in the 
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:1
-    plan: false
+    image: jmccann/drone-terraform:5
 +   role_arn_to_assume: arn:aws:iam::account-of-role-to-assume:role/name-of-role
 ```
 
@@ -142,8 +144,7 @@ and you want to use different drone configurations to apply different environmen
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:1
-    plan: false
+    image: jmccann/drone-terraform:5
 +   root_dir: some/path/here
 ```
 
@@ -154,8 +155,7 @@ all resources will be planned/applied against as the default behavior.
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:1
-    plan: false
+    image: jmccann/drone-terraform:5
 +   targets:
 +     - aws_security_group.generic_sg
 +     - aws_security_group.app_sg
@@ -167,25 +167,53 @@ If you want to change Terraform's default parallelism (currently equal to 10) th
 ```diff
 pipeline:
   terraform:
-    image: jmccann/drone-terraform:1
-    plan: false
+    image: jmccann/drone-terraform:5
 +   parallelism: 2
 ```
 
-Destroying the service can be done using the boolean `destory` option. Keep in mind that Fastly won't allow a service with active version be destoryed. Use `force_destroy` option in the service definition for terraform to handle it.
+Destroying the service can be done by specifying `plan-destroy` and `destroy` actions. Keep in mind that Fastly won't allow a service with active version be destroyed. Use `force_destroy` option in the service definition for terraform to handle it.
 
-```yaml
+```diff
 pipeline:
   destroy:
-    image: jmccann/drone-terraform:1
-    plan: false
-+   destroy: true
+    image: jmccann/drone-terraform:5
++   actions:
++     - plan-destroy
++     - destroy
+```
+
+Formatting the Terraform configuration files can be done by specifying the `fmt` action. Use `fmt_options` parameter to handle formatting options.
+
+```diff
+pipeline:
+  fmt:
+    image: jmccann/drone-terraform:5
++   actions:
++     - fmt
++   fmt_options:
++     write: false
++     diff: true
++     check: true
+```
+
+You may want to run some executions in parallel without having racing condition problems with the .terraform dir and 
+plan's output file.
+
+```diff
+pipeline:
+  backend-service:
+    image: jmccann/drone-terraform:<version>
++   tf_data_dir: .backend-service.terraform
+  frontend-service:
+    image: jmccann/drone-terraform:<version>
++   tf_data_dir: .frontend-service.terraform
 ```
 
 # Parameter Reference
 
-plan
-: if true, calculates a plan but does __NOT__ apply it.
+actions
+: List of terraform actions to perform with the plugin.  List includes:
+`fmt`, `validate`, `plan`, `apply`, `plan-destroy`, `destroy`.
 
 init_options
 : contains the configuration for the Terraform backend.
@@ -200,6 +228,21 @@ init_options.lock
 
 init_options.lock-timeout
 : Duration to wait for a state lock. Default `0s`.
+
+fmt_options
+: contains the configuration for the fmt action.
+
+fmt_options.list
+: List files whose formatting differs (disabled if using STDIN). Default `true`.
+
+fmt_options.write
+: Write result to source file instead of STDOUT (disabled if using STDIN or -check). Default `true`.
+
+fmt_options.diff
+: Display diffs of formatting changes. Default `false`.
+
+fmt_options.check
+: Check if the input is formatted. Exit status will be 0 if all input is properly formatted and non-zero otherwise. Default `false`.
 
 vars
 : a map of variables to pass to the Terraform `plan` and `apply` commands.
@@ -224,5 +267,5 @@ root_dir
 parallelism
 : The number of concurrent operations as Terraform walks its graph.
 
-destroy (boolean)
-: Destroys the service (still requires [`force_destroy`](https://www.terraform.io/docs/providers/fastly/r/service_v1.html#force_destroy) option to be set in the service definition)
+tf_data_dir
+: changes the location where Terraform keeps its per-working-directory data, such as the current remote backend configuration.

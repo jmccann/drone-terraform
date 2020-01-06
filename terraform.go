@@ -32,7 +32,7 @@ func downloadTerraform(version string) error {
 func downloadFile(filepath string, url string) error {
 	// Create the file
 	out, err := os.Create(filepath)
-	if err != nil  {
+	if err != nil {
 		return err
 	}
 	defer out.Close()
@@ -46,13 +46,14 @@ func downloadFile(filepath string, url string) error {
 
 	// Writer the body to file
 	_, err = io.Copy(out, resp.Body)
-	if err != nil  {
+	if err != nil {
 		return err
 	}
 
 	return nil
 }
 
+// Unzip a file to a destination
 func Unzip(src, dest string) error {
 	r, err := zip.OpenReader(src)
 	if err != nil {

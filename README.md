@@ -10,8 +10,10 @@ a listing of the available options please take a look at [the docs](https://gith
 Build the binary with the following commands:
 
 ```
-go build
+export GO111MODULE=on
+go mod download
 go test
+go build
 ```
 
 ## Docker
@@ -19,16 +21,9 @@ go test
 Build the docker image with the following commands:
 
 ```
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo
-docker build --rm=true -t jmccann/drone-terraform .
-```
-
-Please note incorrectly building the image for the correct x64 linux and with
-GCO disabled will result in an error when running the Docker image:
-
-```
-docker: Error response from daemon: Container command
-'/bin/drone-terraform' not found or does not exist.
+docker build --rm=true \
+  -t jmccann/drone-terraform \
+  --build-arg terraform_version=0.12.0 .
 ```
 
 ## Usage

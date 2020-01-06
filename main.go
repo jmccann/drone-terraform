@@ -23,10 +23,20 @@ func main() {
 		// plugin args
 		//
 
-		cli.BoolFlag{
-			Name:   "plan",
-			Usage:  "calculates a plan but does NOT apply it",
-			EnvVar: "PLUGIN_PLAN",
+		cli.StringSliceFlag{
+			Name:   "actions",
+			Usage:  "a list of actions to have terraform perform",
+			EnvVar: "PLUGIN_ACTIONS",
+			Value:  &cli.StringSlice{"validate", "plan", "apply"},
+		},
+		cli.StringFlag{
+			Name:   "ca_cert",
+			Usage:  "ca cert to add to your environment to allow terraform to use internal/private resources",
+			EnvVar: "PLUGIN_CA_CERT",
+		},
+		cli.StringFlag{
+			Name:  "env-file",
+			Usage: "source env file",
 		},
 		cli.StringFlag{
 			Name:   "init_options",
@@ -34,24 +44,14 @@ func main() {
 			EnvVar: "PLUGIN_INIT_OPTIONS",
 		},
 		cli.StringFlag{
-			Name:   "vars",
-			Usage:  "a map of variables to pass to the Terraform `plan` and `apply` commands. Each value is passed as a `<key>=<value>` option",
-			EnvVar: "PLUGIN_VARS",
+			Name:   "fmt_options",
+			Usage:  "options for the fmt command. See https://www.terraform.io/docs/commands/fmt.html",
+			EnvVar: "PLUGIN_FMT_OPTIONS",
 		},
-		cli.StringFlag{
-			Name:   "secrets",
-			Usage:  "a map of secrets to pass to the Terraform `plan` and `apply` commands. Each value is passed as a `<key>=<ENV>` option",
-			EnvVar: "PLUGIN_SECRETS",
-		},
-		cli.StringFlag{
-			Name:   "ca_cert",
-			Usage:  "ca cert to add to your environment to allow terraform to use internal/private resources",
-			EnvVar: "PLUGIN_CA_CERT",
-		},
-		cli.BoolFlag{
-			Name:   "sensitive",
-			Usage:  "whether or not to suppress terraform commands to stdout",
-			EnvVar: "PLUGIN_SENSITIVE",
+		cli.IntFlag{
+			Name:   "parallelism",
+			Usage:  "The number of concurrent operations as Terraform walks its graph",
+			EnvVar: "PLUGIN_PARALLELISM",
 		},
 		cli.StringFlag{
 			Name:   "netrc.machine",
@@ -78,37 +78,40 @@ func main() {
 			Usage:  "The root directory where the terraform files live. When unset, the top level directory will be assumed",
 			EnvVar: "PLUGIN_ROOT_DIR",
 		},
-		cli.IntFlag{
-			Name:   "parallelism",
-			Usage:  "The number of concurrent operations as Terraform walks its graph",
-			EnvVar: "PLUGIN_PARALLELISM",
-		},
-
 		cli.StringFlag{
-			Name:  "env-file",
-			Usage: "source env file",
+			Name:   "secrets",
+			Usage:  "a map of secrets to pass to the Terraform `plan` and `apply` commands. Each value is passed as a `<key>=<ENV>` option",
+			EnvVar: "PLUGIN_SECRETS",
 		},
-
+		cli.BoolFlag{
+			Name:   "sensitive",
+			Usage:  "whether or not to suppress terraform commands to stdout",
+			EnvVar: "PLUGIN_SENSITIVE",
+		},
 		cli.StringSliceFlag{
 			Name:   "targets",
 			Usage:  "targets to run apply or plan on",
 			EnvVar: "PLUGIN_TARGETS",
 		},
-
+		cli.StringFlag{
+			Name:   "tf.version",
+			Usage:  "terraform version to use",
+			EnvVar: "PLUGIN_TF_VERSION",
+		},
+		cli.StringFlag{
+			Name:   "vars",
+			Usage:  "a map of variables to pass to the Terraform `plan` and `apply` commands. Each value is passed as a `<key>=<value>` option",
+			EnvVar: "PLUGIN_VARS",
+		},
 		cli.StringSliceFlag{
 			Name:   "var_files",
 			Usage:  "a list of var files to use. Each value is passed as -var-file=<value>",
 			EnvVar: "PLUGIN_VAR_FILES",
 		},
-		cli.BoolFlag{
-			Name:   "destroy",
-			Usage:  "destory all resurces",
-			EnvVar: "PLUGIN_DESTROY",
-		},
 		cli.StringFlag{
-			Name:   "tf.version",
-			Usage:  "terraform version to use",
-			EnvVar: "PLUGIN_TF_VERSION",
+			Name:   "tf_data_dir",
+			Usage:  "changes the location where Terraform keeps its per-working-directory data, such as the current remote backend configuration",
+			EnvVar: "PLUGIN_TF_DATA_DIR",
 		},
 	}
 
@@ -141,21 +144,24 @@ func run(c *cli.Context) error {
 
 	initOptions := InitOptions{}
 	json.Unmarshal([]byte(c.String("init_options")), &initOptions)
+	fmtOptions := FmtOptions{}
+	json.Unmarshal([]byte(c.String("fmt_options")), &fmtOptions)
 
 	plugin := Plugin{
 		Config: Config{
-			Plan:        c.Bool("plan"),
-			Vars:        vars,
-			Secrets:     secrets,
-			InitOptions: initOptions,
-			Cacert:      c.String("ca_cert"),
-			Sensitive:   c.Bool("sensitive"),
-			RoleARN:     c.String("role_arn_to_assume"),
-			RootDir:     c.String("root_dir"),
-			Parallelism: c.Int("parallelism"),
-			Targets:     c.StringSlice("targets"),
-			VarFiles:    c.StringSlice("var_files"),
-			Destroy:     c.Bool("destroy"),
+			Actions:          c.StringSlice("actions"),
+			Vars:             vars,
+			Secrets:          secrets,
+			InitOptions:      initOptions,
+			FmtOptions:       fmtOptions,
+			Cacert:           c.String("ca_cert"),
+			Sensitive:        c.Bool("sensitive"),
+			RoleARN:          c.String("role_arn_to_assume"),
+			RootDir:          c.String("root_dir"),
+			Parallelism:      c.Int("parallelism"),
+			Targets:          c.StringSlice("targets"),
+			VarFiles:         c.StringSlice("var_files"),
+			TerraformDataDir: c.String("tf_data_dir"),
 		},
 		Netrc: Netrc{
 			Login:    c.String("netrc.username"),
