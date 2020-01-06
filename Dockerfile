@@ -22,6 +22,7 @@ RUN apk -U add \
     ca-certificates \
     git \
     wget \
+    postgresql-client \
     openssh-client && \
     rm -rf /var/cache/apk/*
 
