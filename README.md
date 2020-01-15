@@ -16,27 +16,10 @@ go test
 go build
 ```
 
-## Docker
-
-Build the docker image with the following commands:
-
-```
-docker build --rm=true \
-  -t jmccann/drone-terraform \
-  --build-arg terraform_version=0.12.0 .
-```
-
 ## Usage
 
 Execute from the working directory:
 
+```bash
+$ PLUGIN_ACTIONS=plan-fail-on-modification ./drone-terraform 
 ```
-docker run --rm \
-  -v $(pwd):$(pwd) \
-  -w $(pwd) \
-  jmccann/drone-terraform:latest --plan
-```
-
-## Drone 0.4
-
-Legacy `drone-terraform` plugin exists @ `jmccann/drone-terraform:0.4`
