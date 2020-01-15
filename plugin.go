@@ -115,15 +115,17 @@ func (p Plugin) Exec() error {
 		case "validate":
 			commands = append(commands, tfValidate())
 		case "plan":
-			commands = append(commands, tfPlan(p.Config, false))
+			commands = append(commands, tfPlan(p.Config, false, false))
 		case "plan-destroy":
-			commands = append(commands, tfPlan(p.Config, true))
+			commands = append(commands, tfPlan(p.Config, true, false))
+		case "plan-fail-on-modification":
+			commands = append(commands, tfPlan(p.Config, false, true))
 		case "apply":
 			commands = append(commands, tfApply(p.Config))
 		case "destroy":
 			commands = append(commands, tfDestroy(p.Config))
 		default:
-			return fmt.Errorf("valid actions are: fmt, validate, plan, apply, plan-destroy, destroy.  You provided %s", action)
+			return fmt.Errorf("valid actions are: fmt, validate, plan, apply, plan-destroy, plan-fail-on-modification destroy.  You provided %s", action)
 		}
 	}
 
@@ -293,7 +295,7 @@ func tfDestroy(config Config) *exec.Cmd {
 	)
 }
 
-func tfPlan(config Config, destroy bool) *exec.Cmd {
+func tfPlan(config Config, destroy bool, detailedExitCode bool) *exec.Cmd {
 	args := []string{
 		"plan",
 	}
@@ -302,6 +304,10 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 		args = append(args, "-destroy")
 	} else {
 		args = append(args, fmt.Sprintf("-out=%s", getTfoutPath()))
+	}
+
+	if detailedExitCode {
+		args = append(args, "-detailed-exitcode")
 	}
 
 	for _, v := range config.Targets {

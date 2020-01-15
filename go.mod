@@ -10,3 +10,5 @@ require (
 	github.com/urfave/cli v0.0.0-20161006035353-55f715e28c46
 	golang.org/x/sys v0.0.0-20161006025142-8d1157a43547
 )
+
+go 1.13
