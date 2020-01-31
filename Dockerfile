@@ -15,7 +15,7 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -o /go/bin/drone-terraform
 
-FROM alpine:3.9
+FROM alpine:3.11
 
 RUN apk add --no-cache \
     ca-certificates \
