@@ -5,7 +5,6 @@ FROM golang:1.13-alpine AS builder
 
 RUN apk add --no-cache git
 
-RUN mkdir -p /tmp/drone-terraform
 WORKDIR /tmp/drone-terraform
 
 COPY go.mod go.mod
