@@ -1,3 +1,7 @@
+## 6.2-0.12.20 (2020-02-05)
+* Update embedded TF to `0.12.20`
+* Update alpine to 3.11 in docker image (https://github.com/jmccann/drone-terraform/pull/109). Thanks @sgerrand!
+
 ## 6.2-0.12.16 (2019-11-26)
 * Update embedded TF to `0.12.16`
 
