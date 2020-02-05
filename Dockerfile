@@ -5,7 +5,6 @@ FROM golang:1.13-alpine AS builder
 
 RUN apk add --no-cache git
 
-RUN mkdir -p /tmp/drone-terraform
 WORKDIR /tmp/drone-terraform
 
 COPY go.mod go.mod
@@ -16,14 +15,13 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -o /go/bin/drone-terraform
 
-FROM alpine:3.9
+FROM alpine:3.11
 
-RUN apk -U add \
+RUN apk add --no-cache \
     ca-certificates \
     git \
     wget \
-    openssh-client && \
-    rm -rf /var/cache/apk/*
+    openssh-client
 
 ARG terraform_version
 RUN wget -q https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_linux_amd64.zip -O terraform.zip && \
