@@ -21,6 +21,7 @@ RUN apk add --no-cache \
     ca-certificates \
     git \
     wget \
+    curl \
     openssh-client
 
 ARG terraform_version
