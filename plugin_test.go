@@ -94,7 +94,7 @@ func TestPlugin(t *testing.T) {
 			}
 
 			for _, tt := range tests {
-				g.Assert(tfApply(tt.args.config)).Equal(tt.want)
+				g.Assert(tfApply(tt.args.config).Args).Equal(tt.want.Args)
 			}
 		})
 	})
