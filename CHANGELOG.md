@@ -1,3 +1,6 @@
+## 6.3-0.12.20 (2020-02-12)
+* add ability to load creds from `env_file` parameter (https://github.com/jmccann/drone-terraform/pull/107).  Thanks @neemiasjnr!
+
 ## 6.2-0.12.20 (2020-02-05)
 * Update embedded TF to `0.12.20`
 * Update alpine to 3.11 in docker image (https://github.com/jmccann/drone-terraform/pull/109). Thanks @sgerrand!
