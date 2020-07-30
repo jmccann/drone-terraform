@@ -399,7 +399,6 @@ func vars(vs map[string]string) []string {
 		if isEnvVar {
 			envVarName := getStrBetween(v, "${", "}")
 			v = os.Getenv(envVarName)
-			fmt.Println(v)
 		}
 		args = append(args, "-var", fmt.Sprintf("%s=%s", k, v))
 	}
