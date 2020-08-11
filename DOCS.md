@@ -229,6 +229,9 @@ init_options.lock
 init_options.lock-timeout
 : Duration to wait for a state lock. Default `0s`.
 
+init_options.refresh
+: Update the state for each resource prior to planning and applying. Default `true`.
+
 fmt_options
 : contains the configuration for the fmt action.
 
