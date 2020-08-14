@@ -114,6 +114,11 @@ func main() {
 			Usage:  "changes the location where Terraform keeps its per-working-directory data, such as the current remote backend configuration",
 			EnvVar: "PLUGIN_TF_DATA_DIR",
 		},
+		cli.BoolFlag{
+			Name:   "disable_refresh",
+			Usage:  "whether or not to disable refreshing state before `plan` and `apply` commands",
+			EnvVar: "PLUGIN_DISABLE_REFRESH",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -163,6 +168,7 @@ func run(c *cli.Context) error {
 			Targets:          c.StringSlice("targets"),
 			VarFiles:         c.StringSlice("var_files"),
 			TerraformDataDir: c.String("tf_data_dir"),
+			DisableRefresh:   c.Bool("disable_refresh"),
 		},
 		Netrc: Netrc{
 			Login:    c.String("netrc.username"),

@@ -34,6 +34,7 @@ type (
 		Targets          []string
 		VarFiles         []string
 		TerraformDataDir string
+		DisableRefresh   bool
 	}
 
 	// Netrc is credentials for cloning
@@ -48,7 +49,6 @@ type (
 		BackendConfig []string `json:"backend-config"`
 		Lock          *bool    `json:"lock"`
 		LockTimeout   string   `json:"lock-timeout"`
-		Refresh       *bool    `json:"refresh"`
 	}
 
 	// FmtOptions fmt options for the Terraform's fmt command
@@ -235,11 +235,6 @@ func initCommand(config InitOptions) *exec.Cmd {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.LockTimeout))
 	}
 
-	// True is default in TF
-	if config.Refresh != nil {
-		args = append(args, fmt.Sprintf("-refresh=%t", *config.Refresh))
-	}
-
 	// Fail Terraform execution on prompt
 	args = append(args, "-input=false")
 
@@ -276,8 +271,8 @@ func tfApply(config Config) *exec.Cmd {
 	if config.InitOptions.LockTimeout != "" {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
-	if config.InitOptions.Refresh != nil {
-		args = append(args, fmt.Sprintf("-refresh=%t", *config.InitOptions.Refresh))
+	if config.DisableRefresh {
+		args = append(args, "-refresh=false")
 	}
 	args = append(args, getTfoutPath())
 
@@ -337,8 +332,8 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 	if config.InitOptions.LockTimeout != "" {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
-	if config.InitOptions.Refresh != nil {
-		args = append(args, fmt.Sprintf("-refresh=%t", *config.InitOptions.Refresh))
+	if config.DisableRefresh {
+		args = append(args, "-refresh=false")
 	}
 	return exec.Command(
 		"terraform",

@@ -229,9 +229,6 @@ init_options.lock
 init_options.lock-timeout
 : Duration to wait for a state lock. Default `0s`.
 
-init_options.refresh
-: Update the state for each resource prior to planning and applying. Default `true`.
-
 fmt_options
 : contains the configuration for the fmt action.
 
@@ -272,3 +269,6 @@ parallelism
 
 tf_data_dir
 : changes the location where Terraform keeps its per-working-directory data, such as the current remote backend configuration.
+
+disable_refresh
+: (default: `false`) - whether or not to disable refreshing state before `plan` and `apply` commands.
