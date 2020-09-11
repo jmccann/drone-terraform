@@ -1,3 +1,11 @@
+## 6.4-0.13.2 (2020-09-11)
+* Update embedded TF to `0.13.2`
+
+## 6.4-0.13.1 (2020-09-11)
+* minor version bump due to major version change of terraform
+* Update embedded TF to `0.13.1`
+* added curl
+
 ## 6.3-0.12.20 (2020-02-12)
 * add ability to load creds from `env_file` parameter (https://github.com/jmccann/drone-terraform/pull/107).  Thanks @neemiasjnr!
 
