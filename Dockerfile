@@ -1,7 +1,7 @@
 # Docker image for the Drone Terraform plugin
 #
 #     docker build -t jmccann/drone-terraform:latest .
-FROM golang:1.13-alpine AS builder
+FROM golang:1.16-alpine AS builder
 
 RUN apk add --no-cache git
 
@@ -15,7 +15,7 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -o /go/bin/drone-terraform
 
-FROM alpine:3.11
+FROM alpine:3.13
 
 RUN apk add --no-cache \
     ca-certificates \

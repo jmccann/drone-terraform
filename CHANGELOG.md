@@ -1,3 +1,8 @@
+## 8.0-0.15.1 (2021-04-27)
+* Update embedded TF to `0.15.1`
+  * Please refer to [Terraform v15 Migration Guide](https://www.terraform.io/upgrade-guides/0-15.html)
+* Update other deps
+
 ## 7.0-0.14.11 (2021-04-27)
 * Update embedded TF to `0.14.11`
   * Please refer to [Terraform v14 Migration Guide](https://www.terraform.io/upgrade-guides/0-14.html)
