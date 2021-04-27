@@ -1,3 +1,6 @@
+## 8.1-0.15.1 (2021-04-27)
+* added ability to [disable refresh](https://github.com/jmccann/drone-terraform/pull/120)
+
 ## 8.0-0.15.1 (2021-04-27)
 * Update embedded TF to `0.15.1`
   * Please refer to [Terraform v15 Migration Guide](https://www.terraform.io/upgrade-guides/0-15.html)
