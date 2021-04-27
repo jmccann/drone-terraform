@@ -269,3 +269,6 @@ parallelism
 
 tf_data_dir
 : changes the location where Terraform keeps its per-working-directory data, such as the current remote backend configuration.
+
+disable_refresh
+: (default: `false`) - whether or not to disable refreshing state before `plan` and `apply` commands.

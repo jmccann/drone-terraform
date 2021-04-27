@@ -34,6 +34,7 @@ type (
 		Targets          []string
 		VarFiles         []string
 		TerraformDataDir string
+		DisableRefresh   bool
 	}
 
 	// Netrc is credentials for cloning
@@ -270,6 +271,9 @@ func tfApply(config Config) *exec.Cmd {
 	if config.InitOptions.LockTimeout != "" {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
+	if config.DisableRefresh {
+		args = append(args, "-refresh=false")
+	}
 	args = append(args, getTfoutPath())
 
 	return exec.Command(
@@ -327,6 +331,9 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 	}
 	if config.InitOptions.LockTimeout != "" {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
+	}
+	if config.DisableRefresh {
+		args = append(args, "-refresh=false")
 	}
 	return exec.Command(
 		"terraform",
