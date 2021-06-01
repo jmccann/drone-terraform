@@ -113,27 +113,27 @@ func TestPlugin(t *testing.T) {
 				{
 					"default",
 					args{config: Config{}},
-					exec.Command("terraform", "destroy", "-force"),
+					exec.Command("terraform", "destroy", "-auto-approve"),
 				},
 				{
 					"with parallelism",
 					args{config: Config{Parallelism: 5}},
-					exec.Command("terraform", "destroy", "-parallelism=5", "-force"),
+					exec.Command("terraform", "destroy", "-parallelism=5", "-auto-approve"),
 				},
 				{
 					"with targets",
 					args{config: Config{Targets: []string{"target1", "target2"}}},
-					exec.Command("terraform", "destroy", "-target=target1", "-target=target2", "-force"),
+					exec.Command("terraform", "destroy", "-target=target1", "-target=target2", "-auto-approve"),
 				},
 				{
 					"with vars",
 					args{config: Config{Vars: map[string]string{"username": "someuser", "password": "1pass"}}},
-					exec.Command("terraform", "destroy", "-var", "username=someuser", "-var", "password=1pass", "-force"),
+					exec.Command("terraform", "destroy", "-var", "username=someuser", "-var", "password=1pass", "-auto-approve"),
 				},
 				{
 					"with var-files",
 					args{config: Config{VarFiles: []string{"common.tfvars", "prod.tfvars"}}},
-					exec.Command("terraform", "destroy", "-var-file=common.tfvars", "-var-file=prod.tfvars", "-force"),
+					exec.Command("terraform", "destroy", "-var-file=common.tfvars", "-var-file=prod.tfvars", "-auto-approve"),
 				},
 			}
 
