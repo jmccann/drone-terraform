@@ -300,7 +300,7 @@ func tfDestroy(config Config) *exec.Cmd {
 	if config.InitOptions.LockTimeout != "" {
 		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
 	}
-	args = append(args, "-force")
+	args = append(args, "-auto-approve")
 	return exec.Command(
 		"terraform",
 		args...,
