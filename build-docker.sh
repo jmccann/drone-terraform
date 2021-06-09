@@ -12,7 +12,7 @@ fi
 major=$(echo $tag | awk -F. '{print $1}')
 minor=$(echo $tag | awk -F. '{print $2}')
 
-tf_ver="0.15.1"
+tf_ver="1.0.0"
 
 echo "Confirm building images for:"
 echo "  MAJOR: ${major}"
