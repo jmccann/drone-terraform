@@ -244,14 +244,20 @@ func TestPlugin(t *testing.T) {
 					exec.Command("terraform", "fmt", "-check=true"),
 				},
 				{
+					"with recursive",
+					args{config: Config{FmtOptions: FmtOptions{Recursive: &affirmative}}},
+					exec.Command("terraform", "fmt", "-recursive=true"),
+				},
+				{
 					"with combination",
 					args{config: Config{FmtOptions: FmtOptions{
 						List:  &negative,
 						Write: &negative,
 						Diff:  &affirmative,
 						Check: &affirmative,
+						Recursive: &affirmative,
 					}}},
-					exec.Command("terraform", "fmt", "-list=false", "-write=false", "-diff=true", "-check=true"),
+					exec.Command("terraform", "fmt", "-list=false", "-write=false", "-diff=true", "-check=true", "-recursive=true"),
 				},
 			}
 

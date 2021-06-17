@@ -57,6 +57,7 @@ type (
 		Write *bool `json:"write"`
 		Diff  *bool `json:"diff"`
 		Check *bool `json:"check"`
+		Recursive *bool `json:"recursive"`
 	}
 
 	// Plugin represents the plugin instance to be executed
@@ -363,6 +364,9 @@ func tfFmt(config Config) *exec.Cmd {
 	}
 	if config.FmtOptions.Check != nil {
 		args = append(args, fmt.Sprintf("-check=%t", *config.FmtOptions.Check))
+	}
+	if config.FmtOptions.Recursive != nil {
+		args = append(args, fmt.Sprintf("-recursive=%t", *config.FmtOptions.Recursive))
 	}
 	return exec.Command(
 		"terraform",
