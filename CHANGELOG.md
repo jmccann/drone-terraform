@@ -1,3 +1,6 @@
+## 8.3-0.15.1 (2021-07-09)
+* fix: remove -lock and -lock-timeout for terraform init - https://github.com/jmccann/drone-terraform/pull/130
+
 ## 8.2-0.15.1 (2021-06-02)
 * fix: `-force` -> `-auto-approve` - https://github.com/jmccann/drone-terraform/pull/128
 
