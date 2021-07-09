@@ -1,3 +1,6 @@
+## 8.2-0.15.1 (2021-06-02)
+* fix: `-force` -> `-auto-approve` - https://github.com/jmccann/drone-terraform/pull/128
+
 ## 8.1-0.15.1 (2021-04-27)
 * added ability to [disable refresh](https://github.com/jmccann/drone-terraform/pull/120)
 
