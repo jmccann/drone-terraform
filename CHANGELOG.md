@@ -1,3 +1,8 @@
+## 8.3-1.0.2 (2021-07-09)
+* Update embedded TF to `1.0.2`
+  * A continuation of `v0.15` release line but now following semver
+  * Please refer to [Terraform v1.0 Compatibility Promises](https://www.terraform.io/docs/language/v1-compatibility-promises.html)
+
 ## 8.3-0.15.1 (2021-07-09)
 * fix: remove -lock and -lock-timeout for terraform init - https://github.com/jmccann/drone-terraform/pull/130
 
