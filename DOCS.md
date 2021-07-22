@@ -194,6 +194,7 @@ pipeline:
 +     write: false
 +     diff: true
 +     check: true
++     recursive: true
 ```
 
 You may want to run some executions in parallel without having racing condition problems with the .terraform dir and 
@@ -243,6 +244,9 @@ fmt_options.diff
 
 fmt_options.check
 : Check if the input is formatted. Exit status will be 0 if all input is properly formatted and non-zero otherwise. Default `false`.
+
+fmt_options.recursive
+: Process files in subdirectories as well. Default `false`.
 
 vars
 : a map of variables to pass to the Terraform `plan` and `apply` commands.
