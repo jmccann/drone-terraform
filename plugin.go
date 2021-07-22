@@ -226,16 +226,6 @@ func initCommand(config InitOptions) *exec.Cmd {
 		args = append(args, fmt.Sprintf("-backend-config=%s", v))
 	}
 
-	// True is default in TF
-	if config.Lock != nil {
-		args = append(args, fmt.Sprintf("-lock=%t", *config.Lock))
-	}
-
-	// "0s" is default in TF
-	if config.LockTimeout != "" {
-		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.LockTimeout))
-	}
-
 	// Fail Terraform execution on prompt
 	args = append(args, "-input=false")
 
