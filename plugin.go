@@ -35,6 +35,7 @@ type (
 		VarFiles         []string
 		TerraformDataDir string
 		DisableRefresh   bool
+		DetailedExitcode bool
 	}
 
 	// Netrc is credentials for cloning
@@ -324,6 +325,9 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 	}
 	if config.DisableRefresh {
 		args = append(args, "-refresh=false")
+	}
+	if config.DetailedExitcode {
+		args = append(args, "-detailed-exitcode")
 	}
 	return exec.Command(
 		"terraform",

@@ -119,6 +119,11 @@ func main() {
 			Usage:  "whether or not to disable refreshing state before `plan` and `apply` commands",
 			EnvVar: "PLUGIN_DISABLE_REFRESH",
 		},
+		cli.BoolFlag{
+			Name:   "detailed_exitcode",
+			Usage:  "whether or not to use flag `-detailed-exitcode` with `plan` command",
+			EnvVar: "PLUGIN_DETAILED_EXITCODE",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -169,6 +174,7 @@ func run(c *cli.Context) error {
 			VarFiles:         c.StringSlice("var_files"),
 			TerraformDataDir: c.String("tf_data_dir"),
 			DisableRefresh:   c.Bool("disable_refresh"),
+			DetailedExitcode: c.Bool("detailed_exitcode"),
 		},
 		Netrc: Netrc{
 			Login:    c.String("netrc.username"),

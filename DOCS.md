@@ -272,3 +272,6 @@ tf_data_dir
 
 disable_refresh
 : (default: `false`) - whether or not to disable refreshing state before `plan` and `apply` commands.
+
+detailed_exitcode
+: (default: `false`) - whether or not to use flag `-detailed-exitcode` with `plan` command.
