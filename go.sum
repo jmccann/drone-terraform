@@ -16,4 +16,5 @@ github.com/joho/godotenv v1.3.0 h1:Zjp+RcGpHhGlrMbJzXTrZZPrWj+1vfm90La1wgB6Bhc=
 github.com/joho/godotenv v1.3.0/go.mod h1:7hK45KPybAkOC6peb+G5yklZfMxEjkZhHbwpqxOKXbg=
 github.com/urfave/cli v0.0.0-20161006035353-55f715e28c46 h1:EztUvugq7AA7F3lYLmtFQyvKdcY5pisPt10DqPjRCL8=
 github.com/urfave/cli v0.0.0-20161006035353-55f715e28c46/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
+golang.org/x/sys v0.0.0-20161006025142-8d1157a43547 h1:lieXmNKpDj68llh9S3E0TfOPO3kHHn5jt5d/2nmylEc=
 golang.org/x/sys v0.0.0-20161006025142-8d1157a43547/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
