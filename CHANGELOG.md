@@ -1,3 +1,8 @@
+## 8.3-1.2.8 (2022-08-25)
+* Update embedded TF to `1.2.8`
+  * Please refer to [Terraform v1.2.0 Upgrade notes](https://github.com/hashicorp/terraform/blob/v1.2.8/CHANGELOG.md#120-may-18-2022)
+  * Please refre to [Terraform v1.1.0 Upgrade notes](https://github.com/hashicorp/terraform/blob/v1.1/CHANGELOG.md#110-december-08-2021)
+
 ## 8.3-1.0.2 (2021-07-09)
 * Update embedded TF to `1.0.2`
   * A continuation of `v0.15` release line but now following semver
