@@ -12,12 +12,14 @@ fi
 major=$(echo $tag | awk -F. '{print $1}')
 minor=$(echo $tag | awk -F. '{print $2}')
 
-tf_ver="1.0.2"
+tf_ver="1.3.1"
+sum_ver="0.2.2"
 
 echo "Confirm building images for:"
 echo "  MAJOR: ${major}"
 echo "  MINOR: ${minor}"
 echo "  TF_VERSION: ${tf_ver}"
+echo "  SUM_VERSION: ${sum_ver}"
 
 read -p "Proceed? [Y/N] " ans
 
@@ -27,7 +29,7 @@ if [[ "$ans" != "Y" && "$ans" != "y" ]]; then
 fi
 
 set -x
-docker build -t jmccann/drone-terraform:latest --build-arg terraform_version=${tf_ver} .
+docker build -t jmccann/drone-terraform:latest --build-arg terraform_version=${tf_ver} --build-arg summarize_version=${sum_ver}.
 
 docker tag jmccann/drone-terraform:latest jmccann/drone-terraform:${major}
 docker tag jmccann/drone-terraform:latest jmccann/drone-terraform:${major}.${minor}

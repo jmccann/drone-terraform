@@ -26,8 +26,11 @@ type (
 		Secrets          map[string]string
 		InitOptions      InitOptions
 		FmtOptions       FmtOptions
+		SummarizeOptions SummarizeOptions
 		Cacert           string
 		Sensitive        bool
+		SkipInit         bool
+		SkipCleanup      bool
 		RoleARN          string
 		RootDir          string
 		Parallelism      int
@@ -57,6 +60,14 @@ type (
 		Write *bool `json:"write"`
 		Diff  *bool `json:"diff"`
 		Check *bool `json:"check"`
+	}
+
+	// SummarizeOptions for tf-summarize
+	SummarizeOptions struct {
+		Draw         *bool `json:"draw"`
+		Md           *bool `json:"md"`
+		Tree         *bool `json:"tree"`
+		SeparateTree *bool `json:"separate_tree"`
 	}
 
 	// Plugin represents the plugin instance to be executed
@@ -104,9 +115,11 @@ func (p Plugin) Exec() error {
 		commands = append(commands, installCaCert(p.Config.Cacert))
 	}
 
-	commands = append(commands, deleteCache(terraformDataDir))
-	commands = append(commands, initCommand(p.Config.InitOptions))
-	commands = append(commands, getModules())
+	if !p.Config.SkipInit {
+		commands = append(commands, deleteCache(terraformDataDir))
+		commands = append(commands, initCommand(p.Config.InitOptions))
+		commands = append(commands, getModules())
+	}
 
 	// Add commands listed from Actions
 	for _, action := range p.Config.Actions {
@@ -119,6 +132,8 @@ func (p Plugin) Exec() error {
 			commands = append(commands, tfPlan(p.Config, false))
 		case "plan-destroy":
 			commands = append(commands, tfPlan(p.Config, true))
+		case "summarize":
+			commands = append(commands, tfSummary(p.Config))
 		case "apply":
 			commands = append(commands, tfApply(p.Config))
 		case "destroy":
@@ -128,7 +143,9 @@ func (p Plugin) Exec() error {
 		}
 	}
 
-	commands = append(commands, deleteCache(terraformDataDir))
+	if !p.Config.SkipCleanup {
+		commands = append(commands, deleteCache(terraformDataDir))
+	}
 
 	for _, c := range commands {
 		if c.Dir == "" {
@@ -329,6 +346,48 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 		"terraform",
 		args...,
 	)
+}
+
+func tfSummary(config Config) *exec.Cmd {
+	json_cmd := exec.Command("terraform", "show", "-json", getTfoutPath())
+	json_path := fmt.Sprintf("%s.json", getTfoutPath())
+
+	json_file, err := os.Create(json_path)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Fatal("Failed to create JSON state file")
+	}
+	logrus.Debug("JSON state file created successfully")
+
+	json_cmd.Stdout = json_file
+	defer json_file.Close()
+
+	err = json_cmd.Run()
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Fatal("Failed to execute a command")
+	}
+
+	var args []string
+
+	if config.SummarizeOptions.Draw != nil {
+		args = append(args, "-draw")
+	}
+	if config.SummarizeOptions.Md != nil {
+		args = append(args, "-md")
+	}
+	if config.SummarizeOptions.Tree != nil {
+		args = append(args, "-tree")
+	}
+	if config.SummarizeOptions.SeparateTree != nil {
+		args = append(args, "-separate-tree")
+	}
+
+	args = append(args, json_path)
+
+	return exec.Command("tf-summarize", args...)
 }
 
 func tfValidate() *exec.Cmd {
