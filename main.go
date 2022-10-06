@@ -45,6 +45,11 @@ func main() {
 			EnvVar: "PLUGIN_INIT_OPTIONS",
 		},
 		cli.StringFlag{
+			Name:   "summarize_options",
+			Usage:  "options for the tf-summarize command. See https://github.com/dineshba/tf-summarize#usage",
+			EnvVar: "PLUGIN_SUMMARIZE_OPTIONS",
+		},
+		cli.StringFlag{
 			Name:   "fmt_options",
 			Usage:  "options for the fmt command. See https://www.terraform.io/docs/commands/fmt.html",
 			EnvVar: "PLUGIN_FMT_OPTIONS",
@@ -53,6 +58,16 @@ func main() {
 			Name:   "parallelism",
 			Usage:  "The number of concurrent operations as Terraform walks its graph",
 			EnvVar: "PLUGIN_PARALLELISM",
+		},
+		cli.BoolFlag{
+			Name:   "skip_init",
+			Usage:  "skip terraform init (useful for usage with s3-cache)",
+			EnvVar: "PLUGIN_SKIP_INIT",
+		},
+		cli.BoolFlag{
+			Name:   "skip_cleanup",
+			Usage:  "skip removal of .terraform/ (useful for usage with s3-cache)",
+			EnvVar: "PLUGIN_SKIP_CLEANUP",
 		},
 		cli.StringFlag{
 			Name:   "netrc.machine",
@@ -152,6 +167,8 @@ func run(c *cli.Context) error {
 	json.Unmarshal([]byte(c.String("init_options")), &initOptions)
 	fmtOptions := FmtOptions{}
 	json.Unmarshal([]byte(c.String("fmt_options")), &fmtOptions)
+	summarizeOptions := SummarizeOptions{}
+	json.Unmarshal([]byte(c.String("summarize_options")), &summarizeOptions)
 
 	plugin := Plugin{
 		Config: Config{
@@ -160,10 +177,13 @@ func run(c *cli.Context) error {
 			Secrets:          secrets,
 			InitOptions:      initOptions,
 			FmtOptions:       fmtOptions,
+			SummarizeOptions: summarizeOptions,
 			Cacert:           c.String("ca_cert"),
 			Sensitive:        c.Bool("sensitive"),
 			RoleARN:          c.String("role_arn_to_assume"),
 			RootDir:          c.String("root_dir"),
+			SkipInit:         c.Bool("skip_init"),
+			SkipCleanup:      c.Bool("skip_cleanup"),
 			Parallelism:      c.Int("parallelism"),
 			Targets:          c.StringSlice("targets"),
 			VarFiles:         c.StringSlice("var_files"),

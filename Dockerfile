@@ -28,6 +28,10 @@ ARG terraform_version
 RUN wget -q https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_linux_amd64.zip -O terraform.zip && \
   unzip terraform.zip -d /bin && \
   rm -f terraform.zip
+ARG summarize_version
+RUN curl -sL https://github.com/dineshba/tf-summarize/releases/download/v${summarize_version}/tf-summarize_linux_amd64.zip -osummarize.zip && \
+  unzip summarize.zip tf-summarize -d /bin && \
+  rm -f summarize.zip
 
 COPY --from=builder /go/bin/drone-terraform /bin/
 ENTRYPOINT ["/bin/drone-terraform"]
