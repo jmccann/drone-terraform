@@ -1,3 +1,15 @@
+## 8.4-1.3.1 (2022-10-06)
+* Update embedded TF to `1.3.1`
+* Add the ability to `skip_init`
+  * Doesn't run `init` pre-cleanup of `.terraform/`
+  * Handful together with `s3-cache` plugin
+* Add the ability to `skip_cleanup`
+  * Doesn't remove `.terraform/` on finish
+  * Handful together with `s3-cache` plugin
+* Integrate [`tf-summarize`](https://github.com/dineshba/tf-summarize) into the plugin
+  * New `summarize` action - requires a generated plan file to be present
+  * Has bool options `draw`, `md`, `tree` and `separate_tree` in the `summarize_options` plugin setting to tune the output
+
 ## 8.3-1.0.2 (2021-07-09)
 * Update embedded TF to `1.0.2`
   * A continuation of `v0.15` release line but now following semver
