@@ -250,7 +250,7 @@ func tfApply(config Config) *exec.Cmd {
 		"apply",
 	}
 	for _, v := range config.Targets {
-		args = append(args, "--target", fmt.Sprintf("%s", v))
+		args = append(args, "-target", fmt.Sprintf("%s", v))
 	}
 	if config.Parallelism > 0 {
 		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
@@ -309,7 +309,7 @@ func tfPlan(config Config, destroy bool) *exec.Cmd {
 	}
 
 	for _, v := range config.Targets {
-		args = append(args, "--target", fmt.Sprintf("%s", v))
+		args = append(args, "-target", fmt.Sprintf("%s", v))
 	}
 	args = append(args, varFiles(config.VarFiles)...)
 	args = append(args, vars(config.Vars)...)

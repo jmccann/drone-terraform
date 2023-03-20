@@ -89,7 +89,7 @@ func TestPlugin(t *testing.T) {
 				{
 					"with targets",
 					args{config: Config{Targets: []string{"target1", "target2"}}},
-					exec.Command("terraform", "apply", "--target", "target1", "--target", "target2", "plan.tfout"),
+					exec.Command("terraform", "apply", "-target", "target1", "-target", "target2", "plan.tfout"),
 				},
 			}
 
